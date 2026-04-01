@@ -1,0 +1,84 @@
+# 🏢 ROLE ADMIN
+
+## 🧭 STRUKTUR SIDEBAR
+1. Dashboard
+2. Data Hotel
+3. Manajemen Petugas
+4. Manajemen Kamar
+5. Transaksi
+6. Operasional
+7. Laporan
+
+---
+### 1️⃣ DASHBOARD
+- Fungsi: Monitoring cepat (read-only)
+- Konten: Total Booking, Kamar Terisi, Kamar Tersedia, Total Pendapatan, Grafik Booking (harian/bulanan)
+- Alur: Admin login → Sistem ambil data → Tampilkan ringkasan
+
+### 2️⃣ DATA HOTEL
+- Fungsi: Sumber data utama untuk tampilan user
+- Sub menu:
+  - Profil Hotel (Lihat → Edit → Simpan → Publish)
+  - Fasilitas (Lihat → Edit → Simpan → Publish)
+  - Kebijakan/Aturan (Lihat → Edit → Simpan → Publish)
+
+### 3️⃣ MANAJEMEN PETUGAS (Baru ditambahkan)
+- Daftar Petugas: Nama, Jabatan, Email, Aksi (Edit, Hapus)
+- Tambah Petugas (Register Admin/Staff bari): Popup Form → Submit → Simpan
+- Edit Petugas (Ubah data/jabatan): Form perubahan → Simpan
+- Hapus Petugas: Validasi (super admin tidak boleh dihapus)
+
+### 4️⃣ MANAJEMEN KAMAR (Paling Penting)
+- Daftar Kamar: Nama, Harga, Status (Tersedia/Terisi), Aksi (Detail, Edit, Hapus)
+- Tambah Kamar: Popup Form → Submit → Simpan
+- Detail Kamar (Read-only): Info kamar, Jadwal penggunaan, Rating fitur.
+- Edit Kamar: Form perubahan → Simpan
+- Hapus Kamar: Validasi agar tak dihapus bila ada booking aktif.
+
+### 5️⃣ TRANSAKSI
+- Fungsi: Memantau pembayaran (tidak intervensi)
+- Daftar Transaksi: Booking ID, Nama User, Total Bayar, Status, Metode, Tanggal
+- Refund: Daftar refund berdasarkan aturan sistem (pending/sukses/gagal)
+
+### 6️⃣ OPERASIONAL
+- Fungsi: Aturan konfigurasi sistem.
+- Payment Gateway: Atur mode API (Sandbox/Production)
+- Diskon & Promo: Tipe Diskon, Syarat, dan Periode berlakunya (Diterapkan otomatis saat tamu booking).
+
+### 7️⃣ LAPORAN
+- Fungsi: Rekap Data Eksport.
+- Konten: Total Booking, Total Pendapatan, Okupansi. Disertai Filter Tanggal & Export.
+
+==================================================
+
+# 👤 ROLE USER (TAMU)
+
+## 🧭 NAVIGASI TOPBAR (SETELAH LOGIN)
+1. Dashboard
+2. Cari Kamar
+3. Booking Saya
+4. Profil
+// Logout (opsional nempel di tombol profil)
+
+---
+### 1️⃣ DASHBOARD USER
+- Fungsi: Ringkasan & Shortcut
+- Konten: Booking Aktif, Transaksi Berlangsung, Booking Terdekat, Total Riwayat Menginap.
+- Aksi Cepat: Tombol Cari Kamar, Lanjutkan Pembayaran, Booking Lagi.
+
+### 2️⃣ CARI KAMAR (Menu Utama)
+- Flow Normal: Daftar Kamar → Detail Kamar → Form Booking → Konfirmasi → Bayar (Sekarang/Nanti)
+- Cari Cepat (Shortcut): Filter Tanggal & Jumlah → Hasil Kamar → Booking.
+- Detail Kamar: Tampil Foto, Harga, Fasilitas, Rating & Tombol Booking. (Tdk ada pembayaran di sini).
+
+### 3️⃣ BOOKING SAYA (Kontrol Pusat)
+- Daftar Booking: Menunggu Pembayaran, Aktif, Selesai, Batal. (Beserta Filter tgl/status).
+- Detail Booking: Info Kamar, Tgl In/Out, Tagihan.
+- Aksi di Detail: 
+  - Bayar (Bila nunggak)
+  - Batalkan (Bila masih sesuai syarat)
+  - Beri Rating (Hanya aktif bila status Selesai).
+
+### 4️⃣ PROFIL
+- Fungsi: Cukup simpan biodata dasar.
+- Konten: Nama, Email, No.Ponsel, Ganti Password.

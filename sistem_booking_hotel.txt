@@ -1,0 +1,245 @@
+SISTEM BOOKING HOTEL STRUKTUR & ALUR SISTEM (FINAL REVISI)
+
+================================================== ROLE ADMIN
+==================================================
+
+STRUKTUR SIDEBAR ADMIN 1. Dashboard 2. Data Hotel 3. Manajemen Kamar 4.
+Transaksi 5. Operasional 6. Laporan
+
+  --------------------------------------------------
+  1. DASHBOARD ADMIN
+  --------------------------------------------------
+  Fungsi: Halaman monitoring cepat untuk melihat
+  kondisi sistem.
+
+  Konten: - Total Booking - Kamar Terisi - Kamar
+  Tersedia - Total Pendapatan - Booking Hari Ini -
+  Grafik Booking (Harian / Bulanan)
+
+  Alur: Admin login → Sistem mengambil data agregat
+  → Sistem menghitung statistik → Dashboard
+  menampilkan ringkasan
+
+  Catatan: Dashboard hanya monitoring (read-only).
+  --------------------------------------------------
+
+2. DATA HOTEL
+
+2.1 Profil Hotel Menampilkan: - Nama hotel - Deskripsi - Alamat -
+Kontak - Email - Jam check-in - Jam check-out
+
+Alur: Admin membuka profil → Edit informasi → Simpan → Data diperbarui
+
+2.2 Fasilitas Hotel
+
+Contoh fasilitas: - Wifi - Kolam renang - Parkir - Restoran - Gym -
+Laundry
+
+Alur: Admin membuka fasilitas → Tambah / Edit → Simpan → Data diperbarui
+
+2.3 Kebijakan Hotel
+
+Contoh: - Kebijakan pembatalan - Jam check-in / check-out - Aturan
+merokok - Kebijakan anak
+
+Alur: Admin membuka kebijakan → Edit → Simpan → Kebijakan diperbarui
+
+  --------------------
+  3. MANAJEMEN KAMAR
+  --------------------
+
+3.1 Daftar Kamar Menampilkan: - Nama kamar - Harga per malam -
+Kapasitas - Status kamar - Aksi (Detail | Edit | Hapus)
+
+Status: - Tersedia - Terisi - Maintenance
+
+3.2 Tambah Kamar
+
+Data: - Nama kamar - Tipe kamar - Harga - Kapasitas - Deskripsi - Foto -
+Fasilitas
+
+Alur: Klik tambah kamar → Form muncul → Isi data → Konfirmasi → Data
+tersimpan
+
+3.3 Detail Kamar
+
+Menampilkan: - Foto kamar - Deskripsi - Harga - Fasilitas - Jadwal
+booking - Rating user
+
+Halaman read-only.
+
+3.4 Edit Kamar
+
+Alur: Klik edit → Form edit muncul → Ubah data → Simpan perubahan
+
+3.5 Hapus Kamar
+
+Alur: Klik hapus → Konfirmasi → Data kamar dihapus
+
+Validasi: Kamar tidak boleh dihapus jika ada booking aktif.
+
+  --------------
+  4. TRANSAKSI
+  --------------
+
+4.1 Daftar Transaksi
+
+Menampilkan: - Booking ID - Nama user - Nama kamar - Total pembayaran -
+Status pembayaran - Metode pembayaran - Tanggal
+
+Status pembayaran: - Menunggu pembayaran - Berhasil - Gagal - Refund
+
+Alur: Admin membuka halaman transaksi → Sistem mengambil data booking →
+Sistem menampilkan daftar transaksi
+
+4.2 Refund
+
+Menampilkan: - Booking ID - User - Jumlah refund - Status refund
+
+Status: - Pending - Berhasil - Gagal
+
+Refund berjalan sesuai aturan sistem.
+
+  ----------------
+  5. OPERASIONAL
+  ----------------
+
+5.1 Payment Gateway
+
+Digunakan untuk konfigurasi pembayaran.
+
+Data: - API Key - Mode Sandbox - Mode Production
+
+Alur: Admin membuka pengaturan → Mengisi API key → Memilih mode → Simpan
+konfigurasi
+
+5.2 Diskon & Promo
+
+Data promo: - Nama promo - Tipe diskon - Persentase - Tanggal mulai -
+Tanggal berakhir - Syarat penggunaan
+
+Alur: Admin membuat promo → Mengisi data → Simpan → Promo aktif sesuai
+periode
+
+  ------------
+  6. LAPORAN
+  ------------
+
+Konten: - Total booking - Total pendapatan - Tingkat okupansi kamar -
+Grafik pendapatan - Grafik booking
+
+Filter: - Tanggal - Bulan - Tahun
+
+Alur: Admin memilih periode → Sistem menghitung data → Sistem
+menampilkan laporan → Admin dapat export
+
+Export: - PDF - Excel
+
+================================================== ROLE USER
+==================================================
+
+NAVIGASI USER 1. Dashboard 2. Cari Kamar 3. Booking Saya 4. Profil 5.
+Logout
+
+  -------------------
+  1. DASHBOARD USER
+  -------------------
+
+Konten: - Booking Aktif - Transaksi Menunggu Pembayaran - Booking
+Terdekat - Total Riwayat Menginap
+
+Shortcut: - Cari kamar - Lanjutkan pembayaran - Booking lagi
+
+Alur: User login → Sistem mengambil data booking → Dashboard menampilkan
+ringkasan
+
+  ---------------
+  2. CARI KAMAR
+  ---------------
+
+2.1 Daftar Kamar
+
+Menampilkan: - Foto kamar - Nama kamar - Harga per malam - Kapasitas -
+Rating
+
+User dapat: - melihat detail - melakukan booking
+
+2.2 Cari Cepat
+
+Filter: - Tanggal check-in - Tanggal check-out - Jumlah tamu
+
+Alur: User memasukkan filter → Sistem mencari kamar tersedia → Sistem
+menampilkan hasil
+
+2.3 Detail Kamar
+
+Menampilkan: - Foto - Deskripsi - Harga - Fasilitas - Rating - Tombol
+booking
+
+  ------------------
+  3. BOOKING KAMAR
+  ------------------
+
+3.1 Form Booking
+
+User mengisi: - Tanggal check-in - Tanggal check-out - Jumlah tamu -
+Catatan tambahan
+
+3.2 Konfirmasi Booking
+
+Menampilkan: - Detail kamar - Tanggal menginap - Total harga
+
+User dapat: - Konfirmasi - Membatalkan
+
+3.3 Status Booking
+
+Status awal: Menunggu pembayaran
+
+Jika berhasil: Booking dikonfirmasi
+
+  -----------------
+  4. BOOKING SAYA
+  -----------------
+
+4.1 Daftar Booking
+
+Menampilkan: - Booking ID - Nama kamar - Tanggal menginap - Status
+
+Status: - Menunggu pembayaran - Aktif - Selesai - Dibatalkan
+
+4.2 Detail Booking
+
+Menampilkan: - Detail kamar - Tanggal - Total pembayaran - Status
+pembayaran
+
+Aksi user: - Bayar sekarang - Batalkan booking - Beri rating (jika
+selesai)
+
+  ---------------
+  5. PEMBAYARAN
+  ---------------
+
+Alur: Booking dibuat → Status menunggu pembayaran → User memilih metode
+pembayaran → Payment gateway memproses → Sistem menerima callback →
+Status booking diperbarui
+
+Jika gagal: Status tetap menunggu pembayaran
+
+Jika berhasil: Status booking aktif
+
+  ----------------
+  6. PROFIL USER
+  ----------------
+
+Data profil: - Nama - Email - Nomor telepon - Password
+
+Alur: User membuka profil → Edit data → Simpan → Data diperbarui
+
+================================================== ALUR BESAR SISTEM
+==================================================
+
+USER FLOW Login → Cari kamar → Booking kamar → Pembayaran → Status
+booking → Menginap → Memberi rating
+
+ADMIN FLOW Login → Dashboard monitoring → Kelola kamar → Pantau
+transaksi → Atur promo → Lihat laporan

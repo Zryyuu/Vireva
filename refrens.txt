@@ -1,0 +1,485 @@
+**ROLE ADMIN*
+
+---
+
+## 🧭 STRUKTUR SIDEBAR (Revisi)
+
+1. Dashboard
+2. Data Hotel
+3. Manajemen Kamar
+4. Transaksi
+5. Operasional
+6. Laporan
+
+---
+
+# 1️⃣ DASHBOARD
+
+### Fungsi
+
+👉 **monitoring cepat**, bukan halaman kerja
+
+### Konten
+
+* Total Booking
+* Kamar Terisi
+* Kamar Tersedia
+* Total Pendapatan
+* Grafik Booking (harian / bulanan)
+
+### Alur Sistem
+
+```
+Admin login
+→ Sistem ambil data agregat
+→ Tampilkan ringkasan (read-only)
+```
+
+📌 Tidak ada aksi CRUD di dashboard ✔️
+
+---
+
+# 2️⃣ DATA HOTEL
+
+### Fungsi
+
+👉 **sumber data utama** untuk tampilan user
+
+### Sub Menu & Alur
+
+#### 🏨 Profil Hotel
+
+```
+Lihat profil
+→ Edit profil
+→ Simpan perubahan
+→ Data diperbarui
+```
+
+#### 🧩 Fasilitas
+
+```
+Lihat fasilitas
+→ Edit fasilitas
+→ Simpan
+→ Data diperbarui
+```
+
+#### 📜 Kebijakan / Aturan
+
+```
+Lihat kebijakan
+→ Edit kebijakan
+→ Simpan
+→ Data diperbarui
+```
+
+📌 Semua **langsung publish**, tidak perlu approval.
+
+---
+
+# 3️⃣ MANAJEMEN KAMAR (Paling Penting)
+
+### 3.1 Daftar Kamar
+
+Menampilkan:
+
+* Nama kamar
+* Harga
+* Status (tersedia / terisi)
+* Aksi: Detail | Edit | Hapus
+
+---
+
+### 3.2 Tambah Kamar
+
+```
+Klik Tambah
+→ Popup Form
+→ Isi data kamar
+→ Konfirmasi tambah?
+    ├─ Ya → Data tersimpan
+    └─ Batal → Popup ditutup
+```
+
+---
+
+### 3.3 Detail Kamar
+
+Menampilkan:
+
+* Informasi kamar
+* Jadwal penggunaan (tanggal + booking)
+* Rating kamar (hasil review user)
+
+📌 **Read-only**
+
+---
+
+### 3.4 Edit Kamar
+
+```
+Klik Edit
+→ Popup Form Edit
+→ Konfirmasi update?
+    ├─ Ya → Data terupdate
+    └─ Batal → Popup ditutup
+```
+
+---
+
+### 3.5 Hapus Kamar
+
+```
+Klik Hapus
+→ Konfirmasi hapus?
+    ├─ Ya → Data terhapus
+    └─ Batal → Popup ditutup
+```
+
+📌 Validasi:
+
+* Kamar **tidak boleh dihapus jika ada booking aktif** (opsional tapi bagus)
+
+---
+
+# 4️⃣ TRANSAKSI
+
+👉 **Admin hanya memantau**, tidak intervensi pembayaran
+
+### 4.1 Daftar Transaksi
+
+Menampilkan:
+
+* Booking ID
+* Nama user
+* Total bayar
+* Status pembayaran
+* Metode pembayaran
+* Tanggal
+
+```
+Admin buka transaksi
+→ Sistem ambil data booking + payment
+→ Tampilkan daftar
+```
+
+---
+
+### 4.2 Refund
+
+```
+Admin buka refund
+→ Lihat daftar refund
+→ Status refund (pending / sukses / gagal)
+```
+
+📌 Refund **berdasarkan aturan**, bukan manual approve.
+
+---
+
+# 5️⃣ OPERASIONAL (Ini sudah PAS)
+
+👉 Berisi **aturan & konfigurasi sistem**, bukan data operasional harian
+
+### 5.1 Payment Gateway
+
+```
+Admin buka payment gateway
+→ Atur API key / mode sandbox / production
+→ Simpan konfigurasi
+```
+
+📌 Tidak CRUD transaksi ✔️
+📌 Hanya konfigurasi ✔️
+
+---
+
+### 5.2 Diskon & Promo
+
+```
+Lihat promo
+→ Tambah / edit diskon
+→ Tentukan:
+   - tipe diskon
+   - periode
+   - syarat
+→ Simpan
+```
+
+📌 Promo otomatis diterapkan saat booking user.
+
+---
+
+# 6️⃣ LAPORAN
+
+👉 **Rekap data**, bukan manajemen
+
+### Konten
+
+* Rekap Total Booking
+* Total Pendapatan
+* Rekap Okupansi
+* Filter tanggal
+* Export (opsional)
+
+### Alur
+
+```
+Admin pilih periode
+→ Sistem hitung data
+→ Tampilkan laporan
+→ (Opsional) export
+```
+
+---
+
+# 🔄 ALUR BESAR ROLE ADMIN (Ringkas)
+
+```
+LOGIN
+→ DASHBOARD (monitoring)
+
+→ DATA HOTEL (info hotel)
+→ MANAJEMEN KAMAR (CRUD kamar)
+→ TRANSAKSI (monitor payment)
+→ OPERASIONAL (aturan sistem)
+→ LAPORAN (rekap & analisis)
+```
+
+---
+Sip 👍 aku sudah pahami **mindmap user** yang kamu kirim. Sekarang aku **revisi & rapikan alurnya**, supaya:
+
+* ✔️ **tidak nanggung**
+* ✔️ **alur lurus & masuk akal**
+* ✔️ **siap dijadikan flow sistem / implementasi**
+* ✔️ **UX lebih bersih** (minim langkah & navigasi)
+
+Aku jelaskan **per menu + alur finalnya**, lalu di akhir aku kasih **versi mindmap ringkas (teks)** biar gampang kamu gambar ulang.
+
+---
+
+# 👤 ROLE USER — ALUR FINAL (REVISI)
+
+## 🧭 NAVIGASI USER (SETELAH LOGIN)
+
+Topbar:
+
+1. Dashboard
+2. Cari Kamar
+3. Booking Saya
+4. Profil
+5. Logout
+
+👉 **Tidak perlu menu berlebihan**
+
+---
+
+# 1️⃣ DASHBOARD USER (REVISI ISI)
+
+### Tujuan
+
+👉 **Ringkasan status + shortcut**, bukan halaman utama eksplor
+
+### Konten Dashboard (dipadatkan & relevan)
+
+#### 🔷 Ringkasan Status
+
+* 🛏️ **Booking Aktif**
+* ⏳ **Transaksi Berlangsung** (menunggu pembayaran)
+* 📅 **Booking Terdekat** (tanggal + kamar)
+* ⭐ **Total Riwayat Menginap**
+
+📌 “Booking terdekat” = booking aktif dengan tanggal check-in paling dekat
+📌 “Total riwayat” = jumlah booking selesai (opsional, tapi masih masuk akal)
+
+---
+
+#### 🔷 Aksi Cepat
+
+* 🔍 Cari Kamar
+* 💳 Lanjutkan Pembayaran (muncul jika ada)
+* 🛏️ Booking Lagi
+
+---
+
+### Alur Dashboard
+
+```text
+Login
+→ Ambil data booking user
+→ Hitung status
+→ Tampilkan ringkasan + shortcut
+```
+
+---
+
+# 2️⃣ MENU: CARI KAMAR (REVISI ALUR)
+
+Ini **menu utama user**, alurnya harus mulus.
+
+## A. Cari Kamar (Normal Flow)
+
+```text
+Cari Kamar
+→ Tampilkan daftar kamar
+→ Lihat detail kamar
+→ Klik Booking
+→ Isi form booking
+→ Konfirmasi
+→ Bayar? (opsional sekarang / nanti)
+```
+
+---
+
+## B. Cari Cepat (Shortcut)
+
+```text
+Cari Cepat
+→ Isi tanggal + jumlah tamu
+→ Sistem filter kamar
+→ Tampilkan hasil
+→ Lanjut ke detail kamar
+```
+
+📌 Cari cepat **bukan menu terpisah**, tapi fitur di halaman Cari Kamar ✔️
+
+---
+
+## C. Detail Kamar
+
+Menampilkan:
+
+* Foto
+* Harga
+* Fasilitas
+* Rating
+* Tombol **Booking**
+
+📌 Tidak ada pembayaran di sini
+
+---
+
+# 3️⃣ MENU: BOOKING SAYA (DIGABUNG TOTAL)
+
+👉 Ini **kontrol pusat user**
+
+## A. Daftar Booking
+
+Menampilkan:
+
+* Semua booking user
+* Status:
+
+  * Menunggu pembayaran
+  * Aktif
+  * Selesai
+  * Dibatalkan
+
+Filter:
+
+* Status
+* Tanggal
+
+---
+
+## B. Detail Booking
+
+Menampilkan:
+
+* Detail kamar
+* Tanggal menginap
+* Total harga
+* Status pembayaran
+
+### Aksi di Detail Booking
+
+* 💳 Bayar (jika belum)
+* ❌ Batalkan (jika masih boleh)
+* ⭐ Beri Rating (jika booking selesai)
+
+📌 **Rating hanya muncul di booking selesai**
+📌 Tidak perlu menu “Review” terpisah ✔️
+
+---
+
+## Alur Booking & Pembayaran
+
+```text
+Booking dibuat
+→ Status: menunggu pembayaran
+→ User bayar (sekarang / nanti)
+→ Payment gateway callback
+→ Status booking update otomatis
+```
+
+---
+
+# 4️⃣ MENU: PROFIL
+
+Sederhana & cukup:
+
+* Nama
+* Email
+* Nomor HP
+* Ganti password
+
+📌 Tidak perlu histori di sini
+
+---
+
+# 🔄 ALUR BESAR USER (FINAL)
+
+```text
+LOGIN
+→ DASHBOARD
+   → shortcut
+
+→ CARI KAMAR
+   → Detail kamar
+   → Booking
+
+→ BOOKING SAYA
+   → Bayar
+   → Lihat status
+   → Rating
+
+→ PROFIL
+```
+
+---
+
+# 🧠 MINDMAP USER (VERSI RAPI – TEKS)
+
+Bisa kamu gambar ulang:
+
+```
+User
+├─ Dashboard
+│  ├─ Booking Aktif
+│  ├─ Transaksi Berlangsung
+│  ├─ Booking Terdekat
+│  └─ Total Riwayat Menginap
+│
+├─ Cari Kamar
+│  ├─ Daftar Kamar
+│  │  └─ Detail Kamar
+│  │     └─ Booking
+│  │        └─ Form Booking
+│  │           └─ Bayar?
+│  └─ Cari Cepat
+│     └─ Form Filter
+│        └─ Hasil Kamar
+│
+├─ Booking Saya
+│  ├─ Daftar Booking
+│  └─ Detail Booking
+│     ├─ Bayar
+│     ├─ Batalkan
+│     └─ Rating
+│
+└─ Profil
+   └─ Edit Profil
+```
+
+---

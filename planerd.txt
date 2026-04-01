@@ -1,0 +1,74 @@
+Table users {
+  id bigint [pk, increment]
+  name varchar
+  email varchar [unique]
+  password varchar
+  role varchar [note: 'admin / user']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table tamu {
+  id bigint [pk, increment]
+  user_id bigint [note: 'Relasi ke akun login']
+  nama_tamu varchar
+  no_identitas varchar
+  no_hape varchar
+  alamat varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table petugas {
+  id bigint [pk, increment]
+  user_id bigint [note: 'Relasi ke akun login']
+  nama_petugas varchar
+  jabatan varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table kamar {
+  id bigint [pk, increment]
+  nomor_kamar varchar
+  tipe_kamar varchar
+  harga_permalam decimal
+  status_kamar varchar [note: 'tersedia, terisi, maintenance']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table pemesanan {
+  id bigint [pk, increment]
+  tamu_id bigint
+  kamar_id bigint
+  petugas_id bigint [null, note: 'Bisa kosong jika booking online mandiri']
+  tanggal_checkin date
+  tanggal_checkout date
+  total_hari integer
+  total_biaya decimal
+  status_pemesanan varchar [note: 'menunggu, aktif, selesai, batal']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table pembayaran {
+  id bigint [pk, increment]
+  pemesanan_id bigint
+  tanggal_bayar date
+  metode_bayar varchar
+  jumlah_bayar decimal
+  status_bayar varchar [note: 'pending, berhasil, gagal, refund']
+  gateway_id varchar [null, note: 'ID Referensi untuk API Payment Gateway']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Ref: tamu.user_id - users.id // one-to-one
+Ref: petugas.user_id - users.id // one-to-one
+
+Ref: pemesanan.tamu_id > tamu.id // many-to-one
+Ref: pemesanan.kamar_id > kamar.id // many-to-one
+Ref: pemesanan.petugas_id > petugas.id // many-to-one
+
+Ref: pembayaran.pemesanan_id - pemesanan.id // one-to-one
