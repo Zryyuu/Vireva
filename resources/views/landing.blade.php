@@ -1,243 +1,262 @@
 @extends('layouts.bohot')
 
-@section('title', 'Kenyamanan Eksklusif')
+@section('title', 'Beranda')
 
 @section('content')
-<!-- Hero Section -->
-<section class="min-h-screen flex items-center justify-center relative hero-section px-6 md:px-12 py-32 overflow-hidden shadow-2xl">
-    <div class="max-w-5xl w-full text-center space-y-10 relative z-10 animate__animated animate__fadeIn">
-        
-        <div class="space-y-4">
-            <h1 class="text-5xl md:text-8xl font-bold text-white tracking-widest leading-loose italic drop-shadow-2xl">
-                Pesan <span class="text-accent">Kamar</span> Impian Anda
-            </h1>
-            <p class="text-lg md:text-2xl text-white/90 font-medium tracking-widest max-w-3xl mx-auto drop-shadow-lg italic">
-                Pesan Penginapan Mewah & Tak Terlupakan Bersama Bohot.
-            </p>
+    <!-- Hero Start -->
+    <section class="relative min-h-[90vh] lg:min-h-[85vh] flex items-center pt-32 lg:pt-24 pb-12 overflow-hidden bg-white">
+        <div class="max-w-7xl mx-auto px-6 w-full relative z-10">
+            <div class="grid lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+                <!-- Konten Kiri (Text) -->
+                <div class="lg:col-span-6 space-y-8 lg:space-y-10 animate__animated animate__fadeInLeft text-center lg:text-left order-2 lg:order-1">
+                    <div class="inline-flex items-center gap-3 bg-light px-4 py-2 rounded-full border border-dark/5 mx-auto lg:mx-0">
+                        <span class="flex h-2 w-2 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                        </span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-dark/60">Grand Opening 2026</span>
+                    </div>
+                    
+                    <div class="space-y-4 lg:space-y-6">
+                        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.2] tracking-tighter">
+                            Pengalaman <br class="hidden sm:block">
+                            Menginap yang <br class="hidden lg:block">
+                            <span class="text-primary italic">Lebih Personal</span>.
+                        </h1>
+                        <p class="text-secondary text-base lg:text-lg max-w-lg mx-auto lg:mx-0 leading-relaxed font-light">
+                            Nikmati pengalaman menginap butik dengan paduan desain modern dan layanan yang lebih personal.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4 items-center justify-center lg:justify-start">
+                        <a href="#rooms" class="w-full sm:w-auto text-center bg-dark text-white px-10 py-5 font-bold uppercase tracking-widest hover:bg-primary transition-all shadow-xl shadow-dark/10">Lihat Koleksi</a>
+                        <a href="#about" class="group flex items-center gap-4 px-6 py-5 font-bold uppercase tracking-widest hover:text-primary transition-all">
+                            Visi Kami 
+                            <span class="w-10 h-10 rounded-full border border-dark/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
+                                <i data-lucide="play" class="w-3 h-3 fill-current"></i>
+                            </span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Media Kanan (Image) -->
+                <div class="lg:col-span-6 relative animate__animated animate__fadeInRight animate__delay-1s mt-12 lg:mt-0 order-1 lg:order-2">
+                    <div class="relative group">
+                        <!-- Gambar Utama -->
+                        <div class="aspect-[16/10] sm:aspect-video lg:aspect-[16/10] bg-dark overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.25)]">
+                            <img src="{{ asset('images/hero.jpg') }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3000ms]" alt="Hero Image">
+                        </div>
+                        
+                        <!-- Kotak Aksen (Kiri Atas - Disesuaikan) -->
+                        <div class="absolute -top-4 -left-4 w-24 h-24 bg-primary/5 -z-10 hidden sm:block"></div>
+
+                        <!-- Persegi Panjang Dekoratif (Full Ukuran Image - Bawah Kanan) -->
+                        <div class="absolute -bottom-6 -right-6 lg:-bottom-12 lg:-right-12 w-full h-full bg-primary/20 -z-10 hidden sm:block"></div>
+                    </div>
+                </div>
+            </div>
         </div>
         
-        <!-- Search Glassmorphism Card -->
-        <div class="glass p-8 md:p-12 rounded-3xl shadow-[-1px_1px_5px_0px_#f9fafb08,1px_-1px_5px_0px_#f9fafb08,0px_45px_100px_0px_#00000045] flex flex-wrap lg:flex-nowrap gap-8 items-end border border-white/20 transform transition-all hover:scale-[1.01] duration-500">
-            
-            <div class="flex-1 min-w-[200px] text-left">
-                <label class="block text-white/70 text-sm font-bold mb-3 ml-6 uppercase tracking-widest">Check-in</label>
-                <div class="bg-white/95 rounded-xl px-8 py-5 flex items-center gap-4 border border-white/10 shadow-inner group transition-all hover:shadow-accent/20">
-                    <i data-lucide="calendar" class="w-5 h-5 text-primary group-hover:text-accent transition-colors"></i>
-                    <input type="text" value="18 Nov 2026" class="w-full font-bold focus:outline-none text-primary bg-transparent cursor-pointer">
+        <!-- Elemen Latar Belakang -->
+        <div class="absolute top-0 right-0 w-full lg:w-1/3 h-full bg-light/50 -z-10 hidden lg:block"></div>
+    </section>
+
+    <!-- Fitur Cepat -->
+    <section class="py-16 lg:py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+                @foreach([
+                    ['icon' => 'zap', 'title' => 'Desain Khusus', 'desc' => 'Identitas arsitektural unik untuk setiap villa kami.', 'delay' => ''],
+                    ['icon' => 'infinity', 'title' => 'Peluncuran Perdana', 'desc' => 'Jadilah yang pertama menikmati koleksi baru kami.', 'delay' => 'animate__delay-0.5s'],
+                    ['icon' => 'eye-off', 'title' => 'Privasi Total', 'desc' => 'Lokasi tenang yang dirancang untuk kenyamanan maksimal Anda.', 'delay' => 'animate__delay-1s'],
+                    ['icon' => 'coffee', 'title' => 'Layanan Modern', 'desc' => 'Pendekatan baru dan modern untuk setiap kebutuhan Anda.', 'delay' => 'animate__delay-1.5s']
+                ] as $feature)
+                <div class="group p-8 border border-dark/10 shadow-sm hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 animate__animated animate__fadeInUp {{ $feature['delay'] }}">
+                    <div class="w-16 h-16 flex items-center justify-center bg-light text-primary mb-6 group-hover:bg-primary group-hover:text-white transition-colors">
+                        <i data-lucide="{{ $feature['icon'] }}" class="w-6 h-6"></i>
+                    </div>
+                    <h5 class="text-xl mb-3 uppercase tracking-tighter font-bold">{{ $feature['title'] }}</h5>
+                    <p class="text-sm text-secondary leading-relaxed font-light">{{ $feature['desc'] }}</p>
                 </div>
+                @endforeach
             </div>
-            
-            <div class="flex-1 min-w-[200px] text-left">
-                <label class="block text-white/70 text-sm font-bold mb-3 ml-6 uppercase tracking-widest">Check-out</label>
-                <div class="bg-white/95 rounded-xl px-8 py-5 flex items-center gap-4 border border-white/10 shadow-inner group transition-all hover:shadow-accent/20">
-                    <i data-lucide="calendar" class="w-5 h-5 text-primary group-hover:text-accent transition-colors"></i>
-                    <input type="text" value="22 Nov 2026" class="w-full font-bold focus:outline-none text-primary bg-transparent cursor-pointer">
-                </div>
-            </div>
-            
-            <div class="flex-1 min-w-[200px] text-left">
-                <label class="block text-white/70 text-sm font-bold mb-3 ml-6 uppercase tracking-widest">Tamu</label>
-                <div class="bg-white/95 rounded-xl px-8 py-5 flex items-center gap-4 border border-white/10 shadow-inner group transition-all hover:shadow-accent/20">
-                    <i data-lucide="users" class="w-5 h-5 text-primary group-hover:text-accent transition-colors"></i>
-                    <select class="w-full font-bold focus:outline-none bg-transparent text-primary appearance-none">
-                        <option>2 Dewasa, 1 Anak</option>
-                        <option>1 Dewasa</option>
-                        <option>2 Dewasa</option>
-                        <option>3+ Dewasa</option>
-                    </select>
-                </div>
-            </div>
-            
-            <button class="bg-accent hover:bg-accent-hover text-white px-12 py-5 rounded-xl font-bold text-lg uppercase tracking-widest shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:shadow-accent/40 flex items-center gap-3 mx-auto lg:mx-0 min-w-[240px] justify-center">
-                <span>CARI KAMAR</span>
-                <i data-lucide="search" class="w-5 h-5"></i>
-            </button>
         </div>
-    </div>
-    
+    </section>
 
-</section>
-
-<!-- Featured Rooms Section -->
-<section id="kamar" class="py-32 px-6 md:px-12 bg-white relative">
-    <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-end mb-20">
-            <div class="max-w-xl text-left space-y-4">
-                <span class="text-accent font-bold uppercase tracking-[0.4em] text-sm block italic">Koleksi Terkurasi</span>
-                <h2 class="text-5xl md:text-7xl font-bold text-primary italic tracking-tight leading-tight">Cari Kamar <br>Unggulan</h2>
-                <div class="bg-accent h-1.5 w-32 rounded-xl mt-4"></div>
-            </div>
-            <a href="/rooms" class="hidden md:flex items-center gap-3 font-bold text-accent uppercase tracking-widest group border-b-2 border-transparent hover:border-accent pb-1 transition-all duration-300 text-sm">
-                Lihat Semua Kamar 
-                <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-2 transition-transform"></i>
-            </a>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-16">
-            
-            <!-- Room Card 1 -->
-            <div class="group relative rounded-3xl overflow-hidden shadow-2xl bg-white h-[650px] flex flex-col justify-end p-12">
-                <img src="https://images.unsplash.com/photo-1590490359683-658d3d23f972?q=80&w=1200" 
-                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Deluxe Ocean View">
-                <div class="absolute inset-0 bg-gradient-to-t from-primary via-primary/30 to-transparent opacity-90"></div>
+    <!-- Tentang Dimulai -->
+    <section id="about" class="py-24 lg:py-32 bg-light overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+                <div class="relative grid grid-cols-1 sm:grid-cols-2 gap-6 animate__animated animate__fadeInLeft">
+                    <div class="space-y-4 pt-12">
+                        <img src="{{ asset('images/about_1.jpg') }}" class="w-full h-64 sm:h-80 object-cover shadow-2xl hover:scale-105 transition-transform duration-700" alt="Tentang 1">
+                        <div class="bg-primary p-6 sm:p-10 text-white shadow-xl">
+                            <h4 class="text-2xl sm:text-3xl font-bold mb-1 italic tracking-tighter">Est 2026</h4>
+                            <p class="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] opacity-80">Standar Baru Dimulai</p>
+                        </div>
+                    </div>
+                    <div>
+                        <img src="{{ asset('images/about_2.jpg') }}" class="w-full h-[24rem] sm:h-[32rem] object-cover shadow-2xl hover:scale-105 transition-transform duration-700" alt="Tentang 2">
+                    </div>
+                </div>
                 
-                <!-- Room Badge -->
-                <div class="absolute top-8 left-8 z-20">
-                    <span class="glass px-6 py-2.5 rounded-xl text-white text-xs font-bold flex items-center gap-2 border border-white/30 backdrop-blur-md">
-                        <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span> TERSEDIA
-                    </span>
-                </div>
-
-                <div class="relative z-10 space-y-6">
-                    <div class="flex justify-between items-end">
-                        <div class="space-y-2">
-                            <h3 class="text-4xl font-bold text-white tracking-widest italic tracking-tight">Deluxe Ocean View</h3>
-                            <div class="flex gap-4 text-white/70 text-sm font-medium">
-                                <span class="flex items-center gap-1.5"><i data-lucide="maximize" class="w-4 h-4 text-accent"></i> 45 m²</span>
-                                <span class="flex items-center gap-1.5"><i data-lucide="users" class="w-4 h-4 text-accent"></i> 2 Tamu</span>
+                <div class="animate__animated animate__fadeInRight text-center lg:text-left mt-12 lg:mt-0">
+                    <div class="inline-block border-b-2 border-primary pb-2 mb-6">
+                        <span class="text-xs font-bold uppercase tracking-[0.3em] text-primary">Konsep Vireva</span>
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-8 tracking-tighter leading-tight">Tempat Terbaik untuk <br class="hidden sm:block"> Menemukan Ketenangan</h2>
+                    <p class="text-secondary text-base lg:text-lg mb-10 leading-relaxed font-light mx-auto lg:mx-0 max-w-xl">
+                        Vireva hadir untuk memberikan pengalaman menginap yang tulus dan personal. Kami fokus menciptakan suasana yang tenang agar Anda merasa betah seperti berada di properti pribadi sendiri.
+                    </p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:gap-8 mb-12 text-left">
+                        @foreach(['Villa Eksklusif', 'Layanan 24 Jam', 'Lingkungan Hijau', 'Rekomendasi Spesial'] as $check)
+                        <div class="flex items-center gap-4 group">
+                            <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shadow-sm shrink-0">
+                                <i data-lucide="check" class="w-4 h-4"></i>
                             </div>
+                            <span class="font-bold text-xs sm:text-sm uppercase tracking-widest text-dark/80">{{ $check }}</span>
                         </div>
-                        <div class="flex flex-col items-end">
-                            <div class="flex gap-1 mb-1">
-                                @for($i=0; $i<5; $i++) <i data-lucide="star" class="w-4 h-4 fill-accent text-accent"></i> @endfor
-                            </div>
-                            <span class="text-white/60 text-xs font-bold">24 REVIEW</span>
-                        </div>
+                        @endforeach
                     </div>
                     
-                    <p class="text-white/80 leading-relaxed font-medium">Pengalaman menginap tak tertandingi dengan pemandangan cakrawala laut yang biru langsung dari tempat tidur Anda.</p>
-                    
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end pt-6 border-t border-white/10 gap-6">
-                        <div class="space-y-1">
-                            <span class="text-xs text-white/50 font-bold uppercase tracking-widest">Mulai Dari</span>
-                            <div class="text-white leading-none">
-                                <span class="text-3xl font-extrabold text-accent tracking-widest">Rp 3.800.000</span>
-                                <span class="text-sm opacity-60 font-medium whitespace-nowrap">/ MALAM</span>
-                            </div>
-                        </div>
-                        <button class="bg-accent hover:bg-white hover:text-primary px-10 py-4 rounded-xl font-bold text-sm tracking-widest transition-all duration-300 transform group-hover:-translate-y-1 shadow-xl shrink-0">
-                            Pesan Kamar
-                        </button>
-                    </div>
+                    <a href="#" class="inline-flex items-center gap-4 text-dark font-bold uppercase tracking-[0.2em] group">
+                        Cerita Kami
+                        <span class="w-12 h-12 rounded-full border border-dark/10 flex items-center justify-center group-hover:bg-dark group-hover:text-white transition-all">
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </span>
+                    </a>
                 </div>
             </div>
-
-            <!-- Room Card 2 -->
-            <div class="group relative rounded-3xl overflow-hidden shadow-2xl bg-white h-[650px] flex flex-col justify-end p-12">
-                <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1200" 
-                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Premium Mountain Suite">
-                <div class="absolute inset-0 bg-gradient-to-t from-primary via-primary/30 to-transparent opacity-90"></div>
-                
-                <!-- Room Badge -->
-                <div class="absolute top-8 left-8 z-20">
-                    <span class="glass px-6 py-2.5 rounded-xl text-white text-xs font-bold flex items-center gap-2 border border-white/30 backdrop-blur-md">
-                        <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span> TERSEDIA
-                    </span>
-                </div>
-
-                <div class="relative z-10 space-y-6">
-                    <div class="flex justify-between items-end">
-                        <div class="space-y-2">
-                            <h3 class="text-4xl font-bold text-white tracking-widest italic tracking-tight">Premium Mountain Suite</h3>
-                            <div class="flex gap-4 text-white/70 text-sm font-medium">
-                                <span class="flex items-center gap-1.5"><i data-lucide="maximize" class="w-4 h-4 text-accent"></i> 62 m²</span>
-                                <span class="flex items-center gap-1.5"><i data-lucide="users" class="w-4 h-4 text-accent"></i> 4 Tamu</span>
-                            </div>
-                        </div>
-                        <div class="flex flex-col items-end">
-                            <div class="flex gap-1 mb-1">
-                                @for($i=0; $i<5; $i++) <i data-lucide="star" class="w-4 h-4 fill-accent text-accent"></i> @endfor
-                            </div>
-                            <span class="text-white/60 text-xs font-bold">18 REVIEW</span>
-                        </div>
-                    </div>
-                    
-                    <p class="text-white/80 leading-relaxed font-medium">Hiruplah udara pegunungan yang segar di suite eksklusif kami yang dirancang untuk kenyamanan keluarga Anda.</p>
-                    
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end pt-6 border-t border-white/10 gap-6">
-                        <div class="space-y-1">
-                            <span class="text-xs text-white/50 font-bold uppercase tracking-widest">Mulai Dari</span>
-                            <div class="text-white leading-none">
-                                <span class="text-3xl font-extrabold text-accent tracking-widest">Rp 5.200.000</span>
-                                <span class="text-sm opacity-60 font-medium whitespace-nowrap">/ MALAM</span>
-                            </div>
-                        </div>
-                        <button class="bg-accent hover:bg-white hover:text-primary px-10 py-4 rounded-xl font-bold text-sm tracking-widest transition-all duration-300 transform group-hover:-translate-y-1 shadow-xl shrink-0">
-                            Pesan Kamar
-                        </button>
-                    </div>
-                </div>
-            </div>
-
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Facilities Grid -->
-<section id="layanan" class="bg-primary py-32 px-6 md:px-12 text-white relative overflow-hidden">
-    <!-- Decor Circles -->
-    <div class="absolute -top-24 -right-24 w-96 h-96 bg-accent/5 rounded-full blur-3xl"></div>
-    <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-accent/5 rounded-full blur-3xl"></div>
-
-    <div class="max-w-7xl mx-auto relative z-10">
-        <div class="text-center mb-24">
-            <span class="text-accent font-bold uppercase tracking-[0.5em] text-sm block italic mb-4">Pengalaman Tak Terbatas</span>
-            <h2 class="text-5xl font-bold italic tracking-tight uppercase leading-none">Layanan & Fasilitas Kami</h2>
-            <p class="text-white/50 mt-6 max-w-2xl mx-auto font-medium">Kami mengutamakan setiap detail untuk memastikan setiap detik kunjungan Anda menjadi kenangan yang manis.</p>
-        </div>
-
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            <div class="glass p-12 rounded-3xl group hover:scale-105 transition-all duration-500 hover:shadow-accent/10 space-y-6">
-                <div class="p-4 bg-accent/10 rounded-2xl w-fit mx-auto group-hover:bg-accent transition-colors duration-300">
-                    <i data-lucide="wifi" class="w-10 h-10 text-accent group-hover:text-primary transition-colors"></i>
-                </div>
-                <h4 class="text-xl font-bold tracking-widest italic tracking-tight">PHE-WiFi</h4>
-                <p class="text-white/40 text-sm font-medium">Koneksi serat optik kecepatan tinggi di seluruh area.</p>
+    <!-- Kamar Dimulai -->
+    <section id="rooms" class="pt-24 lg:pt-32 pb-20 lg:pb-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="mb-2 text-center animate__animated animate__fadeInUp">
+                <span class="text-xs font-bold uppercase tracking-[0.4em] text-primary mb-4 block">Koleksi Kami</span>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tighter">Koleksi Terbaru</h2>
             </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                @forelse($kamar as $item)
+                <div class="group relative aspect-[4/5] overflow-hidden bg-dark animate__animated animate__fadeInUp" style="animation-delay: {{ $loop->index * 0.1 }}s">
+                    @if($item->foto)
+                        <img src="{{ Storage::url($item->foto) }}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-[2000ms]" alt="{{ $item->tipe_kamar }}">
+                    @else
+                        <div class="w-full h-full bg-light flex flex-col items-center justify-center text-dark/20 uppercase font-bold tracking-widest p-8 text-center">
+                            <i data-lucide="image" class="w-12 h-12 mb-4"></i>
+                            Gambar Menyusul
+                        </div>
+                    @endif
+                    
+                    <div class="absolute inset-0 bg-gradient-to-t from-dark/90 via-dark/20 to-transparent p-6 sm:p-10 flex flex-col justify-end transform transition-transform duration-700">
+                        <div class="space-y-2 translate-y-8 group-hover:translate-y-0 transition-transform duration-500">
+                            <div class="text-[10px] font-bold uppercase tracking-[0.3em] text-primary">{{ $item->tipe_kamar }}</div>
+                            <h3 class="text-2xl sm:text-3xl text-white font-bold tracking-tighter mb-4">Villa Room {{ $item->nomor_kamar }}</h3>
+                            <a href="{{ route('bookings.create', $item->id) }}" class="inline-block bg-white text-dark px-6 py-3 font-bold text-[10px] sm:text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-700">Pesan Sekarang</a>
+                        </div>
+                    </div>
+                    
+                    <div class="absolute top-6 right-6 sm:top-8 sm:right-8 bg-primary/90 text-white px-4 py-2 text-[10px] sm:text-xs font-bold tracking-tighter">
+                        MULAI {{ number_format($item->harga_permalam/1000, 0) }}K
+                    </div>
+                </div>
+                @empty
+                <div class="col-span-full py-4 text-center text-secondary/60 italic font-light tracking-wide text-xl">
+                    Koleksi baru akan segera hadir.
+                </div>
+                <div class="col-span-full h-12 lg:h-16"></div>
+                @endforelse
+            </div>
+        </div>
+    </section>
+
+    <!-- Fasilitas Dimulai (Redesain Radikal: Cinematic Panels - Responsive Optimized) -->
+    <section id="services" class="min-h-screen lg:h-[80vh] lg:min-h-[600px] bg-dark flex flex-col lg:flex-row overflow-hidden relative group/section">
+        @foreach([
+            ['id' => '01', 'slug' => 'service-pool', 'img' => 'pool.jpg', 'title' => 'Kolam Modern', 'desc' => 'Kolam renang minimalis dengan pemandangan terbuka.'],
+            ['id' => '02', 'slug' => 'service-spa', 'img' => 'spa.jpg', 'title' => 'Spa & Relax', 'desc' => 'Pijat dan perawatan tubuh untuk kebugaran Anda.'],
+            ['id' => '03', 'slug' => 'service-dining', 'img' => 'dining_hero.jpg', 'title' => 'Private Dining', 'desc' => 'Hidangan premium langsung di villa pribadi Anda.'],
+            ['id' => '04', 'slug' => 'service-personal', 'img' => 'about_2.jpg', 'title' => 'Layanan Sigap', 'desc' => 'Staf sigap yang siap membantu kebutuhan Anda.']
+        ] as $svc)
+        <div id="{{ $svc['slug'] }}" class="relative flex-none h-64 sm:h-80 lg:h-full lg:flex-1 lg:hover:flex-[2.5] lg:target:flex-[2.5] transition-all duration-700 ease-in-out overflow-hidden border-b lg:border-b-0 lg:border-r border-white/5 group panel-target-fix">
+            <img src="{{ asset('images/' . $svc['img']) }}" class="absolute inset-0 w-full h-full object-cover grayscale-[0.5] opacity-50 group-hover:opacity-80 group-hover:grayscale-0 group-hover:scale-110 group-[.lg\:target\:flex-\[2\.5\]]:opacity-80 group-[.lg\:target\:flex-\[2\.5\]]:grayscale-0 transition-all duration-[3000ms]" alt="{{ $svc['title'] }}">
             
-            <div class="glass p-12 rounded-3xl group hover:scale-105 transition-all duration-500 hover:shadow-accent/10 space-y-6">
-                <div class="p-4 bg-accent/10 rounded-2xl w-fit mx-auto group-hover:bg-accent transition-colors duration-300">
-                    <i data-lucide="waves" class="w-10 h-10 text-accent group-hover:text-primary transition-colors"></i>
+            <!-- Readability Gradient Overlay -->
+            <div class="absolute inset-0 bg-gradient-to-t from-dark/95 via-dark/40 to-transparent transition-opacity duration-500"></div>
+            
+            <div class="absolute inset-0 p-8 sm:p-12 flex flex-col justify-end lg:justify-center">
+                <span class="text-primary font-bold text-base sm:text-lg mb-2 lg:mb-4 block translate-y-4 group-hover:translate-y-0 group-[.lg\:target\:flex-\[2\.5\]]:translate-y-0 transition-transform">{{ $svc['id'] }}</span>
+                <h3 class="text-xl sm:text-3xl lg:text-5xl font-bold text-white mb-2 lg:mb-6 tracking-tighter leading-[0.9] lg:leading-none truncate lg:whitespace-normal drop-shadow-lg">{{ $svc['title'] }}</h3>
+                <div class="max-h-0 lg:group-hover:max-h-40 group-[.lg\:target\:flex-\[2\.5\]]:max-h-40 overflow-hidden transition-all duration-700 lg:opacity-0 lg:group-hover:opacity-100 group-[.lg\:target\:flex-\[2\.5\]]:opacity-100">
+                    <p class="text-white text-sm sm:text-base lg:text-lg font-light leading-relaxed max-w-xs drop-shadow-md">
+                        {{ $svc['desc'] }}
+                    </p>
                 </div>
-                <h4 class="text-xl font-bold tracking-widest italic tracking-tight">Ocean Pool</h4>
-                <p class="text-white/40 text-sm font-medium">Kolam renang infinity dengan pemandangan laut.</p>
-            </div>
-
-            <div class="glass p-12 rounded-3xl group hover:scale-105 transition-all duration-500 hover:shadow-accent/10 space-y-6">
-                <div class="p-4 bg-accent/10 rounded-2xl w-fit mx-auto group-hover:bg-accent transition-colors duration-300">
-                    <i data-lucide="dumbbell" class="w-10 h-10 text-accent group-hover:text-primary transition-colors"></i>
-                </div>
-                <h4 class="text-xl font-bold tracking-widest italic tracking-tight">Luxury Gym</h4>
-                <p class="text-white/40 text-sm font-medium">Peralatan kebugaran modern & personal trainer.</p>
-            </div>
-
-            <div class="glass p-12 rounded-3xl group hover:scale-105 transition-all duration-500 hover:shadow-accent/10 space-y-6">
-                <div class="p-4 bg-accent/10 rounded-2xl w-fit mx-auto group-hover:bg-accent transition-colors duration-300">
-                    <i data-lucide="utensils" class="w-10 h-10 text-accent group-hover:text-primary transition-colors"></i>
-                </div>
-                <h4 class="text-xl font-bold tracking-widest italic tracking-tight">Fine Dining</h4>
-                <p class="text-white/40 text-sm font-medium">Restoran bintang lima dengan koki internasional.</p>
+                <!-- Mobile Only Desc -->
+                <p class="text-white/80 text-xs sm:text-sm lg:hidden mb-4 opacity-100 line-clamp-2">
+                    {{ $svc['desc'] }}
+                </p>
             </div>
         </div>
-    </div>
-</section>
+        @endforeach
+    </section>
 
-<!-- Call to Action Section -->
-<section id="promo" class="py-24 px-6 md:px-12 bg-white">
-    <div class="max-w-7xl mx-auto bg-accent rounded-3xl p-12 md:p-20 relative overflow-hidden shadow-2xl flex flex-col md:flex-row items-center justify-between gap-12">
-        <div class="absolute -top-10 -left-10 w-64 h-64 bg-white/10 rounded-full blur-2xl"></div>
-        <div class="absolute -bottom-10 -right-10 w-64 h-64 bg-white/10 rounded-full blur-2xl"></div>
-        
-        <div class="relative z-10 space-y-6 max-w-2xl text-center md:text-left text-primary">
-            <h2 class="text-4xl md:text-6xl font-bold tracking-tight italic leading-tight">Dapatkan Penawaran Eksklusif Member</h2>
-            <p class="text-lg md:text-xl font-semibold opacity-80">Nikmati diskon hingga 25% untuk pemesanan pertama Anda melalui akun 'Bohot.</p>
+    <!-- Nawala (Redesain Radikal: Manifesto Split - Responsive Optimized) -->
+    <section id="philosophy" class="min-h-screen bg-white flex flex-col lg:flex-row overflow-hidden">
+        <!-- Bagian Manifesto (Kiri) -->
+        <div class="w-full lg:w-7/12 p-12 sm:p-20 lg:p-32 flex flex-col justify-center bg-light/30">
+            <div class="max-w-xl animate__animated animate__fadeInLeft">
+                <span class="text-xs font-bold uppercase tracking-[0.5em] text-primary mb-8 lg:mb-12 block">Filosofi Kami</span>
+                <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter leading-[1] mb-8 lg:mb-12">
+                    KAMI FOKUS <br> PADA <br> <span class="text-primary">KUALITAS.</span>
+                </h2>
+                <p class="text-xl sm:text-2xl font-light text-secondary leading-relaxed mb-8 lg:mb-12 italic">
+                    "Kenyamanan yang sesungguhnya bukan dari apa yang terlihat, tapi dari seberapa tenang Anda saat berada di sini."
+                </p>
+                <div class="flex items-center gap-6">
+                    <div class="w-12 h-px bg-dark"></div>
+                    <span class="font-bold uppercase tracking-widest text-[10px] sm:text-xs">Manajemen Vireva</span>
+                </div>
+            </div>
         </div>
-        
-        <div class="relative z-10 shrink-0">
-            <a href="{{ route('register') }}" class="inline-block bg-primary hover:bg-primary-dark text-white px-12 py-6 rounded-xl font-bold text-xl tracking-widest uppercase shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-                Daftar Sekarang
-            </a>
+
+        <!-- Bagian Subscribe (Kanan) -->
+        <div class="w-full lg:w-5/12 relative flex items-center justify-center p-8 sm:p-12 lg:p-12 min-h-[500px] lg:min-h-0 overflow-hidden">
+            <!-- Background Image -->
+            <img src="{{ asset('images/about_1.jpg') }}" class="absolute inset-0 w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-[5000ms]" alt="Join Background">
+            <div class="absolute inset-0 bg-dark/50 backdrop-blur-[2px]"></div>
+
+            <!-- Glass Card -->
+            <div class="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 p-8 sm:p-12 lg:p-16 shadow-2xl animate__animated animate__fadeInUp">
+                <div class="space-y-8">
+                    <div class="space-y-4">
+                        <h3 class="text-2xl sm:text-3xl font-bold text-white tracking-tighter leading-tight">Tetap Terhubung.</h3>
+                        <p class="text-white/70 font-light text-sm sm:text-base leading-relaxed">Dapatkan informasi terbaru mengenai koleksi villa dan penawaran spesial kami.</p>
+                    </div>
+
+                    <form class="space-y-6">
+                        <div class="space-y-2">
+                            <input type="email" placeholder="Alamat Email Anda" 
+                                   class="w-full bg-white/5 border border-white/10 px-6 py-4 text-white text-sm outline-none focus:ring-1 focus:ring-primary focus:border-primary focus:bg-white/10 transition-all placeholder:text-white/20 rounded-none appearance-none">
+                        </div>
+                        <button class="w-full bg-white text-dark py-4 font-bold uppercase tracking-[0.2em] text-xs hover:bg-primary hover:text-white transition-all shadow-xl">
+                            Gabung Sekarang
+                        </button>
+                    </form>
+
+                    <div class="flex items-center gap-4 opacity-30">
+                        <div class="h-px flex-1 bg-white"></div>
+                        <span class="text-[8px] font-bold uppercase tracking-widest text-white">Vireva Exclusive</span>
+                        <div class="h-px flex-1 bg-white"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accent -->
+            <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl opacity-50 sm:opacity-100"></div>
         </div>
-    </div>
-</section>
+    </section>
 @endsection

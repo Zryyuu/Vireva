@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -44,5 +45,29 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // ===== Role Helpers =====
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
+    }
+
+    // ===== Relationships =====
+
+    public function tamu()
+    {
+        return $this->hasOne(Tamu::class);
+    }
+
+    public function petugas()
+    {
+        return $this->hasOne(Petugas::class);
     }
 }

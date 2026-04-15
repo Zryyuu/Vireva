@@ -12,19 +12,18 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Open Sans', ...defaultTheme.fontFamily.sans],
+                heading: ['Space Grotesk', 'sans-serif'],
             },
             colors: {
                 primary: {
-                    DEFAULT: '#1E3A8A', // Deep Blue
-                    dark: '#172554', // Darker Blue for hover
+                    DEFAULT: '#006a66', // iStudio Teal
+                    hover: '#004b49', // Darker Teal
+                    light: '#e6f0ef', // Very Light Teal
                 },
-                secondary: '#FFFFFF', // White
-                accent: {
-                    DEFAULT: '#F59E0B', // Amber
-                    hover: '#D97706', // Darker Amber
-                },
-                dark: '#000000', // Black
+                secondary: '#555555', // iStudio Gray
+                dark: '#1e2525', // iStudio Dark
+                light: '#f8f9fa', // Light Background
             },
         },
     },
