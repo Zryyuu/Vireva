@@ -29,7 +29,7 @@
                     </div>
 
                     <div class="flex flex-col sm:flex-row gap-4 items-center justify-center lg:justify-start">
-                        <a href="#rooms" class="w-full sm:w-auto text-center bg-dark text-white px-10 py-5 font-bold uppercase tracking-widest hover:bg-primary transition-all shadow-xl shadow-dark/10">Lihat Koleksi</a>
+                        <a href="#services" class="w-full sm:w-auto text-center bg-dark text-white px-10 py-5 font-bold uppercase tracking-widest hover:bg-primary transition-all shadow-xl shadow-dark/10">Eksplorasi Layanan</a>
                         <a href="#about" class="group flex items-center gap-4 px-6 py-5 font-bold uppercase tracking-widest hover:text-primary transition-all">
                             Visi Kami 
                             <span class="w-10 h-10 rounded-full border border-dark/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
@@ -131,49 +131,18 @@
         </div>
     </section>
 
-    <!-- Kamar Dimulai -->
-    <section id="rooms" class="pt-24 lg:pt-32 pb-20 lg:pb-24 bg-white">
+
+    <div id="services" class="bg-white pt-24 pb-12 lg:pt-32 lg:pb-16 text-center animate__animated animate__fadeInUp">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="mb-2 text-center animate__animated animate__fadeInUp">
-                <span class="text-xs font-bold uppercase tracking-[0.4em] text-primary mb-4 block">Koleksi Kami</span>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tighter">Koleksi Terbaru</h2>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                @forelse($kamar as $item)
-                <div class="group relative aspect-[4/5] overflow-hidden bg-dark animate__animated animate__fadeInUp" style="animation-delay: {{ $loop->index * 0.1 }}s">
-                    @if($item->foto)
-                        <img src="{{ Storage::url($item->foto) }}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-[2000ms]" alt="{{ $item->tipe_kamar }}">
-                    @else
-                        <div class="w-full h-full bg-light flex flex-col items-center justify-center text-dark/20 uppercase font-bold tracking-widest p-8 text-center">
-                            <i data-lucide="image" class="w-12 h-12 mb-4"></i>
-                            Gambar Menyusul
-                        </div>
-                    @endif
-                    
-                    <div class="absolute inset-0 bg-gradient-to-t from-dark/90 via-dark/20 to-transparent p-6 sm:p-10 flex flex-col justify-end transform transition-transform duration-700">
-                        <div class="space-y-2 translate-y-8 group-hover:translate-y-0 transition-transform duration-500">
-                            <div class="text-[10px] font-bold uppercase tracking-[0.3em] text-primary">{{ $item->tipe_kamar }}</div>
-                            <h3 class="text-2xl sm:text-3xl text-white font-bold tracking-tighter mb-4">Villa Room {{ $item->nomor_kamar }}</h3>
-                            <a href="{{ route('bookings.create', $item->id) }}" class="inline-block bg-white text-dark px-6 py-3 font-bold text-[10px] sm:text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-700">Pesan Sekarang</a>
-                        </div>
-                    </div>
-                    
-                    <div class="absolute top-6 right-6 sm:top-8 sm:right-8 bg-primary/90 text-white px-4 py-2 text-[10px] sm:text-xs font-bold tracking-tighter">
-                        MULAI {{ number_format($item->harga_permalam/1000, 0) }}K
-                    </div>
-                </div>
-                @empty
-                <div class="col-span-full py-4 text-center text-secondary/60 italic font-light tracking-wide text-xl">
-                    Koleksi baru akan segera hadir.
-                </div>
-                <div class="col-span-full h-12 lg:h-16"></div>
-                @endforelse
-            </div>
+            <span class="inline-block py-1 px-4 rounded-full border border-dark/10 bg-light text-[10px] font-bold uppercase tracking-[0.2em] text-dark/60 mb-5">Vireva Experience</span>
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-dark mb-6">Layanan & Fasilitas</h2>
+            <p class="text-secondary max-w-xl mx-auto text-sm sm:text-base leading-relaxed font-light">
+                Pilihan fasilitas yang kami sediakan untuk memastikan kenyamanan maksimal selama Anda menginap.
+            </p>
         </div>
-    </section>
+    </div>
 
-    <!-- Fasilitas Dimulai (Redesain Radikal: Cinematic Panels - Responsive Optimized) -->
+    <!-- Fasilitas Dimulai (Restored Cinematic Panels) -->
     <section id="services" class="min-h-screen lg:h-[80vh] lg:min-h-[600px] bg-dark flex flex-col lg:flex-row overflow-hidden relative group/section">
         @foreach([
             ['id' => '01', 'slug' => 'service-pool', 'img' => 'pool.jpg', 'title' => 'Kolam Modern', 'desc' => 'Kolam renang minimalis dengan pemandangan terbuka.'],
@@ -181,21 +150,21 @@
             ['id' => '03', 'slug' => 'service-dining', 'img' => 'dining_hero.jpg', 'title' => 'Private Dining', 'desc' => 'Hidangan premium langsung di villa pribadi Anda.'],
             ['id' => '04', 'slug' => 'service-personal', 'img' => 'about_2.jpg', 'title' => 'Layanan Sigap', 'desc' => 'Staf sigap yang siap membantu kebutuhan Anda.']
         ] as $svc)
-        <div id="{{ $svc['slug'] }}" class="relative flex-none h-64 sm:h-80 lg:h-full lg:flex-1 lg:hover:flex-[2.5] lg:target:flex-[2.5] transition-all duration-700 ease-in-out overflow-hidden border-b lg:border-b-0 lg:border-r border-white/5 group panel-target-fix">
-            <img src="{{ asset('images/' . $svc['img']) }}" class="absolute inset-0 w-full h-full object-cover grayscale-[0.5] opacity-50 group-hover:opacity-80 group-hover:grayscale-0 group-hover:scale-110 group-[.lg\:target\:flex-\[2\.5\]]:opacity-80 group-[.lg\:target\:flex-\[2\.5\]]:grayscale-0 transition-all duration-[3000ms]" alt="{{ $svc['title'] }}">
+        <div id="{{ $svc['slug'] }}" class="relative flex-none h-64 sm:h-80 lg:h-full lg:flex-1 lg:hover:flex-[2.5] transition-all duration-700 ease-in-out overflow-hidden border-b lg:border-b-0 lg:border-r border-white/5 group">
+            <img src="{{ asset('images/' . $svc['img']) }}" class="absolute inset-0 w-full h-full object-cover grayscale-[0.5] opacity-40 group-hover:opacity-100 group-hover:grayscale-0 group-hover:scale-110 transition-all duration-[2000ms]" alt="{{ $svc['title'] }}">
             
             <!-- Readability Gradient Overlay -->
-            <div class="absolute inset-0 bg-gradient-to-t from-dark/95 via-dark/40 to-transparent transition-opacity duration-500"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-dark/95 via-dark/20 to-transparent transition-opacity duration-500"></div>
             
             <div class="absolute inset-0 p-8 sm:p-12 flex flex-col justify-end lg:justify-center">
-                <span class="text-primary font-bold text-base sm:text-lg mb-2 lg:mb-4 block translate-y-4 group-hover:translate-y-0 group-[.lg\:target\:flex-\[2\.5\]]:translate-y-0 transition-transform">{{ $svc['id'] }}</span>
+                <span class="text-primary font-bold text-base sm:text-lg mb-2 lg:mb-4 block translate-y-4 group-hover:translate-y-0 transition-transform duration-500">{{ $svc['id'] }}</span>
                 <h3 class="text-xl sm:text-3xl lg:text-5xl font-bold text-white mb-2 lg:mb-6 tracking-tighter leading-[0.9] lg:leading-none truncate lg:whitespace-normal drop-shadow-lg">{{ $svc['title'] }}</h3>
-                <div class="max-h-0 lg:group-hover:max-h-40 group-[.lg\:target\:flex-\[2\.5\]]:max-h-40 overflow-hidden transition-all duration-700 lg:opacity-0 lg:group-hover:opacity-100 group-[.lg\:target\:flex-\[2\.5\]]:opacity-100">
+                <div class="max-h-0 lg:group-hover:max-h-40 overflow-hidden transition-all duration-700 lg:opacity-0 lg:group-hover:opacity-100">
                     <p class="text-white text-sm sm:text-base lg:text-lg font-light leading-relaxed max-w-xs drop-shadow-md">
                         {{ $svc['desc'] }}
                     </p>
                 </div>
-                <!-- Mobile Only Desc -->
+                <!-- Mobile Only Desc (Visible on small screens) -->
                 <p class="text-white/80 text-xs sm:text-sm lg:hidden mb-4 opacity-100 line-clamp-2">
                     {{ $svc['desc'] }}
                 </p>
@@ -207,7 +176,7 @@
     <!-- Nawala (Redesain Radikal: Manifesto Split - Responsive Optimized) -->
     <section id="philosophy" class="min-h-screen bg-white flex flex-col lg:flex-row overflow-hidden">
         <!-- Bagian Manifesto (Kiri) -->
-        <div class="w-full lg:w-7/12 p-12 sm:p-20 lg:p-32 flex flex-col justify-center bg-light/30">
+        <div class="w-full lg:w-7/12 p-12 sm:p-20 lg:p-32 flex flex-col justify-center bg-white">
             <div class="max-w-xl animate__animated animate__fadeInLeft">
                 <span class="text-xs font-bold uppercase tracking-[0.5em] text-primary mb-8 lg:mb-12 block">Filosofi Kami</span>
                 <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter leading-[1] mb-8 lg:mb-12">

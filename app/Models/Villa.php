@@ -4,15 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Kamar extends Model
+class Villa extends Model
 {
-    protected $table = 'kamar';
+    protected $table = 'villas';
 
     protected $fillable = [
-        'nomor_kamar',
-        'tipe_kamar',
+        'nama_villa',
+        'tipe_villa',
         'harga_permalam',
-        'status_kamar',
+        'jumlah_bedroom',
+        'jumlah_bathroom',
+        'luas_bangunan',
+        'status_villa',
         'kapasitas',
         'deskripsi',
         'foto',
@@ -22,16 +25,19 @@ class Kamar extends Model
     protected $casts = [
         'harga_permalam' => 'decimal:2',
         'fasilitas' => 'array',
+        'jumlah_bedroom' => 'integer',
+        'jumlah_bathroom' => 'integer',
+        'luas_bangunan' => 'integer',
     ];
 
     public function pemesanan()
     {
-        return $this->hasMany(Pemesanan::class);
+        return $this->hasMany(Pemesanan::class, 'villa_id');
     }
 
     public function isAvailable()
     {
-        return $this->status_kamar === 'tersedia';
+        return $this->status_villa === 'tersedia';
     }
 
     public function getFormattedHargaAttribute()

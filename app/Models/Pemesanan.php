@@ -10,7 +10,7 @@ class Pemesanan extends Model
 
     protected $fillable = [
         'tamu_id',
-        'kamar_id',
+        'villa_id',
         'petugas_id',
         'tanggal_checkin',
         'tanggal_checkout',
@@ -30,9 +30,9 @@ class Pemesanan extends Model
         return $this->belongsTo(Tamu::class);
     }
 
-    public function kamar()
+    public function villa()
     {
-        return $this->belongsTo(Kamar::class);
+        return $this->belongsTo(Villa::class);
     }
 
     public function petugas()
