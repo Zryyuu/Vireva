@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>Management Center - {{ config('app.name', 'Vireva') }}</title>
+        <title>Pusat Manajemen - {{ config('app.name', 'Vireva') }}</title>
 
         <!-- Fonts & Icons -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -79,7 +79,7 @@
                     
                     <div class="text-[10px] uppercase font-bold tracking-widest text-slate-400 px-4 mb-2 mt-2">Utama</div>
                     <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                        <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+                        <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dasbor
                     </a>
                     <a href="{{ route('admin.villa.index') }}" class="sidebar-link {{ request()->routeIs('admin.villa.*') ? 'active' : '' }}">
                         <i data-lucide="home" class="w-5 h-5"></i> Kelola Villa
@@ -93,18 +93,18 @@
                     <a href="{{ route('admin.biaya.index') }}" class="sidebar-link {{ request()->routeIs('admin.biaya.*') ? 'active' : '' }}">
                         <i data-lucide="receipt" class="w-5 h-5"></i> Catatan Biaya
                     </a>
+                    <a href="{{ route('admin.laporan.index') }}" class="sidebar-link {{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5"></i> Laporan
+                    </a>
                     @endif
 
                     <div class="text-[10px] uppercase font-bold tracking-widest text-slate-400 px-4 mt-8 mb-2">Operasional</div>
-                    <a href="#" class="sidebar-link">
+                    <a href="{{ route('admin.reservasi.index') }}" class="sidebar-link {{ request()->routeIs('admin.reservasi.*') ? 'active' : '' }}">
                         <i data-lucide="calendar-clock" class="w-5 h-5"></i> Reservasi
                         <span class="ml-auto bg-emerald-100 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-full">Live</span>
                     </a>
                     <a href="{{ route('admin.transaksi.index') }}" class="sidebar-link {{ request()->routeIs('admin.transaksi.*') ? 'active' : '' }}">
                         <i data-lucide="credit-card" class="w-5 h-5"></i> Transaksi
-                    </a>
-                    <a href="#" class="sidebar-link">
-                        <i data-lucide="bar-chart-3" class="w-5 h-5"></i> Laporan
                     </a>
                 </nav>
 

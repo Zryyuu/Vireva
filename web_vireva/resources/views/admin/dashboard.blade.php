@@ -189,13 +189,13 @@
                                                 {{ substr($booking->tamu->nama_tamu ?? 'G', 0, 1) }}
                                             </div>
                                             <div>
-                                                <div class="font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">{{ $booking->tamu->nama_tamu ?? 'Guest' }}</div>
-                                                <div class="text-xs text-slate-500 font-medium">{{ $booking->tamu->user->email ?? $booking->tamu->no_hape ?? 'No Contact' }}</div>
+                                                <div class="font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">{{ $booking->tamu->nama_tamu ?? 'Tamu' }}</div>
+                                                <div class="text-xs text-slate-500 font-medium">{{ $booking->tamu->user->email ?? $booking->tamu->no_hape ?? 'Tidak Ada Kontak' }}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-8 py-5">
-                                        <div class="font-bold text-slate-900">{{ $booking->villa->nama_villa ?? 'Unknown' }}</div>
+                                        <div class="font-bold text-slate-900">{{ $booking->villa->nama_villa ?? 'Tidak Diketahui' }}</div>
                                         <div class="text-xs text-slate-500 font-medium">{{ $booking->villa->tipe_villa ?? '-' }}</div>
                                     </td>
                                     <td class="px-8 py-5">
@@ -205,7 +205,7 @@
                                     <td class="px-8 py-5">
                                         @if($booking->status_pemesanan === 'aktif')
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-wider rounded-full border border-blue-200">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Checked In
+                                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Check In
                                             </span>
                                         @elseif($booking->status_pemesanan === 'menunggu')
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-orange-600 text-[10px] font-bold uppercase tracking-wider rounded-full border border-orange-200">
@@ -274,18 +274,20 @@
                             <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 transition-colors"></i>
                         </a>
                         
-                        <a href="{{ route('admin.transaksi.index') }}" class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-transparent transition-all group">
+                        @if(Auth::user()->isSuperAdmin())
+                        <a href="{{ route('admin.laporan.index') }}" class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-transparent transition-all group">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center text-slate-600 transition-colors">
                                     <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
                                 </div>
                                 <div>
-                                    <div class="text-sm font-bold text-slate-900">Laporan Keuangan</div>
-                                    <div class="text-xs text-slate-500 font-medium">Unduh mutasi bulan ini</div>
+                                    <div class="text-sm font-bold text-slate-900">Laporan Finansial</div>
+                                    <div class="text-xs text-slate-500 font-medium">Analisa pendapatan & performa</div>
                                 </div>
                             </div>
                             <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 transition-colors"></i>
                         </a>
+                        @endif
                     </div>
                 </div>
 

@@ -21,11 +21,11 @@
                     <div>
                         <x-input-label for="tipe_villa" value="Tipe Villa" class="text-slate-700 font-bold" />
                         <select id="tipe_villa" name="tipe_villa" class="border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl shadow-sm block mt-2 w-full">
-                            <option value="1-Bedroom Villa">1-Bedroom Villa</option>
-                            <option value="2-Bedroom Villa">2-Bedroom Villa</option>
-                            <option value="3-Bedroom Villa">3-Bedroom Villa</option>
-                            <option value="Family Suite Villa">Family Suite Villa</option>
-                            <option value="Presidential Villa">Presidential Villa</option>
+                            <option value="1-Bedroom Villa">Villa 1 Kamar</option>
+                            <option value="2-Bedroom Villa">Villa 2 Kamar</option>
+                            <option value="3-Bedroom Villa">Villa 3 Kamar</option>
+                            <option value="Family Suite Villa">Villa Suite Keluarga</option>
+                            <option value="Presidential Villa">Villa Kepresidenan</option>
                         </select>
                         <x-input-error :messages="$errors->get('tipe_villa')" class="mt-2" />
                     </div>
@@ -63,11 +63,45 @@
 
                 <div class="mt-8">
                     <x-input-label for="foto" value="Foto Villa (Utama)" class="text-slate-700 font-bold" />
-                    <div class="mt-2 flex items-center gap-4">
-                        <input id="foto" type="file" name="foto" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition-colors" />
+                    <div class="mt-2">
+                        <label for="foto" class="flex flex-col items-center justify-center w-full h-48 border-2 border-slate-200 border-dashed rounded-[2rem] cursor-pointer bg-slate-50 hover:bg-emerald-50/50 hover:border-emerald-200 transition-all group">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-emerald-600 shadow-sm mb-4 transition-colors">
+                                    <i data-lucide="image-plus" class="w-6 h-6"></i>
+                                </div>
+                                <p class="mb-1 text-sm text-slate-600 font-bold">Pilih Foto Villa Utama</p>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">PNG, JPG atau JPEG (Maks. 2MB)</p>
+                            </div>
+                            <input id="foto" type="file" name="foto" class="hidden" onchange="previewImage(this)" />
+                        </label>
+                        
+                        <div id="preview-container" class="mt-6 hidden">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i data-lucide="eye" class="w-4 h-4 text-emerald-600"></i>
+                                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Pratinjau Foto Terpilih</span>
+                            </div>
+                            <img id="preview-img" src="#" class="w-full max-h-80 object-cover rounded-[2rem] border border-slate-200 shadow-sm" />
+                        </div>
                     </div>
                     <x-input-error :messages="$errors->get('foto')" class="mt-2" />
                 </div>
+
+                <script>
+                    function previewImage(input) {
+                        const container = document.getElementById('preview-container');
+                        const img = document.getElementById('preview-img');
+                        
+                        if (input.files && input.files[0]) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                img.src = e.target.result;
+                                container.classList.remove('hidden');
+                                // Refresh lucide icons if needed, but here it's static
+                            }
+                            reader.readAsDataURL(input.files[0]);
+                        }
+                    }
+                </script>
 
                 <div class="mt-8">
                     <x-input-label for="deskripsi" value="Deskripsi Eksklusif" class="text-slate-700 font-bold" />

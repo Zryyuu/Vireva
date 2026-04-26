@@ -17,6 +17,8 @@ class Pemesanan extends Model
         'total_hari',
         'total_biaya',
         'status_pemesanan',
+        'snap_token',
+        'status_pembayaran',
     ];
 
     protected $casts = [

@@ -23,11 +23,11 @@
                     <div>
                         <x-input-label for="tipe_villa" value="Tipe Villa" class="text-slate-700 font-bold" />
                         <select id="tipe_villa" name="tipe_villa" class="border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl shadow-sm block mt-2 w-full">
-                            <option value="1-Bedroom Villa" {{ $villa->tipe_villa == '1-Bedroom Villa' ? 'selected' : '' }}>1-Bedroom Villa</option>
-                            <option value="2-Bedroom Villa" {{ $villa->tipe_villa == '2-Bedroom Villa' ? 'selected' : '' }}>2-Bedroom Villa</option>
-                            <option value="3-Bedroom Villa" {{ $villa->tipe_villa == '3-Bedroom Villa' ? 'selected' : '' }}>3-Bedroom Villa</option>
-                            <option value="Family Suite Villa" {{ $villa->tipe_villa == 'Family Suite Villa' ? 'selected' : '' }}>Family Suite Villa</option>
-                            <option value="Presidential Villa" {{ $villa->tipe_villa == 'Presidential Villa' ? 'selected' : '' }}>Presidential Villa</option>
+                            <option value="1-Bedroom Villa" {{ $villa->tipe_villa == '1-Bedroom Villa' ? 'selected' : '' }}>Villa 1 Kamar</option>
+                            <option value="2-Bedroom Villa" {{ $villa->tipe_villa == '2-Bedroom Villa' ? 'selected' : '' }}>Villa 2 Kamar</option>
+                            <option value="3-Bedroom Villa" {{ $villa->tipe_villa == '3-Bedroom Villa' ? 'selected' : '' }}>Villa 3 Kamar</option>
+                            <option value="Family Suite Villa" {{ $villa->tipe_villa == 'Family Suite Villa' ? 'selected' : '' }}>Villa Suite Keluarga</option>
+                            <option value="Presidential Villa" {{ $villa->tipe_villa == 'Presidential Villa' ? 'selected' : '' }}>Villa Kepresidenan</option>
                         </select>
                         <x-input-error :messages="$errors->get('tipe_villa')" class="mt-2" />
                     </div>
@@ -68,24 +68,69 @@
                     <select id="status_villa" name="status_villa" class="border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl shadow-sm block mt-2 w-full">
                         <option value="tersedia" {{ $villa->status_villa == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
                         <option value="terisi" {{ $villa->status_villa == 'terisi' ? 'selected' : '' }}>Terisi</option>
-                        <option value="maintenance" {{ $villa->status_villa == 'maintenance' ? 'selected' : '' }}>Maintenance</option>
+                        <option value="maintenance" {{ $villa->status_villa == 'maintenance' ? 'selected' : '' }}>Perbaikan</option>
                     </select>
                     <x-input-error :messages="$errors->get('status_villa')" class="mt-2" />
                 </div>
 
                 <div class="mt-8">
-                    <x-input-label for="foto" value="Foto Villa" class="text-slate-700 font-bold" />
-                    <div class="mt-3 bg-slate-50 p-4 border border-slate-200 border-dashed rounded-2xl">
+                    <x-input-label for="foto" value="Perbarui Foto Villa" class="text-slate-700 font-bold" />
+                    <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                         @if($villa->foto)
-                            <div class="mb-4">
-                                <span class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2 block">Foto Saat Ini</span>
-                                <img src="{{ Storage::url($villa->foto) }}" class="w-48 h-32 rounded-xl object-cover shadow-sm border border-slate-200">
+                            <div id="current-photo">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i data-lucide="image" class="w-4 h-4 text-slate-400"></i>
+                                    <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Foto Saat Ini</span>
+                                </div>
+                                <img src="{{ Storage::url($villa->foto) }}" class="w-full max-h-48 object-cover rounded-[2rem] border border-slate-200 shadow-sm">
                             </div>
                         @endif
-                        <input id="foto" type="file" name="foto" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition-colors" />
+
+                        <div class="{{ $villa->foto ? '' : 'md:col-span-2' }}">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i data-lucide="upload-cloud" class="w-4 h-4 text-emerald-600"></i>
+                                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Upload Foto Baru</span>
+                            </div>
+                            <label for="foto" class="flex flex-col items-center justify-center w-full h-48 border-2 border-slate-200 border-dashed rounded-[2rem] cursor-pointer bg-slate-50 hover:bg-emerald-50/50 hover:border-emerald-200 transition-all group">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-400 group-hover:text-emerald-600 shadow-sm mb-3 transition-colors">
+                                        <i data-lucide="image-plus" class="w-5 h-5"></i>
+                                    </div>
+                                    <p class="text-xs text-slate-600 font-bold">Pilih file baru</p>
+                                </div>
+                                <input id="foto" type="file" name="foto" class="hidden" onchange="previewImage(this)" />
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="preview-container" class="mt-6 hidden">
+                        <div class="flex items-center gap-2 mb-3">
+                            <i data-lucide="eye" class="w-4 h-4 text-emerald-600"></i>
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Pratinjau Foto Baru</span>
+                        </div>
+                        <img id="preview-img" src="#" class="w-full max-h-80 object-cover rounded-[2rem] border border-slate-200 shadow-sm" />
                     </div>
                     <x-input-error :messages="$errors->get('foto')" class="mt-2" />
                 </div>
+
+                <script>
+                    function previewImage(input) {
+                        const container = document.getElementById('preview-container');
+                        const img = document.getElementById('preview-img');
+                        
+                        if (input.files && input.files[0]) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                img.src = e.target.result;
+                                container.classList.remove('hidden');
+                                // Optionally hide current photo
+                                const currentPhoto = document.getElementById('current-photo');
+                                if (currentPhoto) currentPhoto.style.opacity = '0.5';
+                            }
+                            reader.readAsDataURL(input.files[0]);
+                        }
+                    }
+                </script>
 
                 <div class="mt-8">
                     <x-input-label for="deskripsi" value="Deskripsi Eksklusif" class="text-slate-700 font-bold" />

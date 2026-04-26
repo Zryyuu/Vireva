@@ -57,7 +57,7 @@
                                 <div class="font-black text-slate-900 tracking-tight text-base">#TRX-{{ str_pad($trx->id, 5, '0', STR_PAD_LEFT) }}</div>
                                 <div class="text-slate-500 text-xs mt-0.5 font-medium flex items-center gap-1">
                                     <i data-lucide="user" class="w-3 h-3"></i> 
-                                    {{ $trx->tamu ? $trx->tamu->nama_tamu : ($trx->user ? $trx->user->name : 'Guest') }}
+                                    {{ $trx->tamu ? $trx->tamu->nama_tamu : ($trx->user ? $trx->user->name : 'Tamu') }}
                                 </div>
                             </td>
                             <td class="px-6 py-4">
@@ -84,7 +84,7 @@
                                 @elseif($trx->status_pemesanan == 'batal')
                                     @if($trx->pembayaran && $trx->pembayaran->status_bayar == 'refund')
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-blue-100 text-blue-700 uppercase tracking-widest">
-                                            <i data-lucide="refresh-ccw" class="w-3 h-3"></i> Refunded
+                                            <i data-lucide="refresh-ccw" class="w-3 h-3"></i> Dikembalikan
                                         </span>
                                     @else
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-red-100 text-red-700 uppercase tracking-widest">
@@ -97,23 +97,43 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 text-right">
+                            <td class="px-6 py-4 text-right flex justify-end gap-2">
                                 @if($trx->status_pemesanan == 'menunggu')
-                                <form action="{{ route('admin.transaksi.action', $trx->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah pembayaran deposit telah diterima? Menyetujui akan membuat reservasi menjadi Aktif.');">
+                                <form action="{{ route('admin.transaksi.action', $trx->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Setujui pembayaran dan aktifkan reservasi?');">
                                     @csrf
                                     <input type="hidden" name="action" value="approve">
-                                    <button type="submit" class="px-3 py-1.5 text-xs font-bold bg-white border border-emerald-200 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors shadow-sm">
-                                        Terima Dana
+                                    <button type="submit" class="px-3 py-1.5 text-[10px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg transition-all shadow-sm shadow-emerald-500/20">
+                                        Setujui
                                     </button>
                                 </form>
                                 @endif
 
-                                @if($trx->status_pemesanan == 'batal' && $trx->pembayaran && $trx->pembayaran->status_bayar == 'berhasil')
-                                <form action="{{ route('admin.transaksi.action', $trx->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Memproses refund akan mencatat pengembalian dana ke tamu. Lanjutkan?');">
+                                @if($trx->status_pemesanan == 'aktif' && $trx->villa && $trx->villa->status_villa !== 'terisi')
+                                <form action="{{ route('admin.transaksi.action', $trx->id) }}" method="POST" class="inline-block">
                                     @csrf
-                                    <input type="hidden" name="action" value="refund">
-                                    <button type="submit" class="px-3 py-1.5 text-xs font-bold bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors shadow-sm">
-                                        Proses Refund
+                                    <input type="hidden" name="action" value="checkin">
+                                    <button type="submit" class="px-3 py-1.5 text-[10px] font-bold bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-all shadow-sm shadow-blue-500/20">
+                                        Check-In
+                                    </button>
+                                </form>
+                                @endif
+
+                                @if($trx->status_pemesanan == 'aktif' && $trx->villa && $trx->villa->status_villa === 'terisi')
+                                <form action="{{ route('admin.transaksi.action', $trx->id) }}" method="POST" class="inline-block">
+                                    @csrf
+                                    <input type="hidden" name="action" value="checkout">
+                                    <button type="submit" class="px-3 py-1.5 text-[10px] font-bold bg-slate-800 text-white hover:bg-slate-900 rounded-lg transition-all shadow-sm">
+                                        Check-Out
+                                    </button>
+                                </form>
+                                @endif
+
+                                @if(in_array($trx->status_pemesanan, ['menunggu', 'aktif']))
+                                <form action="{{ route('admin.transaksi.action', $trx->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Yakin ingin membatalkan reservasi ini?');">
+                                    @csrf
+                                    <input type="hidden" name="action" value="cancel">
+                                    <button type="submit" class="px-3 py-1.5 text-[10px] font-bold bg-white border border-red-200 text-red-500 hover:bg-red-50 rounded-lg transition-all">
+                                        Batal
                                     </button>
                                 </form>
                                 @endif

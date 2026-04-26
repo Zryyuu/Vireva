@@ -30,6 +30,27 @@ class Villa extends Model
         'luas_bangunan' => 'integer',
     ];
 
+    protected $appends = ['nama', 'tipe', 'harga', 'formatted_harga', 'image_url', 'detail'];
+
+    public function getNamaAttribute() { return $this->nama_villa; }
+    public function getTipeAttribute() { return $this->tipe_villa; }
+    public function getHargaAttribute() { return $this->harga_permalam; }
+
+    public function getImageUrlAttribute()
+    {
+        return $this->foto ? url('storage/' . $this->foto) : null;
+    }
+
+    public function getDetailAttribute()
+    {
+        return [
+            'bedroom' => $this->jumlah_bedroom,
+            'bathroom' => $this->jumlah_bathroom,
+            'luas' => $this->luas_bangunan,
+            'deskripsi' => $this->deskripsi,
+        ];
+    }
+
     public function pemesanan()
     {
         return $this->hasMany(Pemesanan::class, 'villa_id');

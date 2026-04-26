@@ -6,6 +6,7 @@ import '../../models/villa_model.dart';
 import '../../providers/booking_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
+import '../booking/payment_screen.dart';
 
 class DetailVillaScreen extends StatefulWidget {
   final VillaModel villa;
@@ -121,7 +122,7 @@ class _DetailVillaScreenState extends State<DetailVillaScreen> {
                         children: [
                           const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
                           Text(
-                            ' 4.9 (124 Reviews)',
+                            ' 4.9 (124 Ulasan)',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -256,19 +257,41 @@ class _DetailVillaScreenState extends State<DetailVillaScreen> {
                 onPressed: bookingProvider.isLoading 
                 ? null 
                 : () async {
-                  final error = await bookingProvider.createBooking(
-                    villaId: villa.id,
-                    checkin: DateFormat('yyyy-MM-dd').format(_checkinDate),
-                    checkout: DateFormat('yyyy-MM-dd').format(_checkoutDate),
-                  );
+                  try {
+                    final snapToken = await bookingProvider.createBooking(
+                      villaId: villa.id,
+                      checkin: DateFormat('yyyy-MM-dd').format(_checkinDate),
+                      checkout: DateFormat('yyyy-MM-dd').format(_checkoutDate),
+                    );
 
-                  if (context.mounted) {
-                    if (error != null) {
+                    if (context.mounted) {
+                      if (snapToken != null) {
+                        // Buka Halaman Pembayaran
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PaymentScreen(
+                              snapToken: snapToken,
+                              onFinish: (success) {
+                                Navigator.pop(context); // Tutup WebView
+                                if (success) {
+                                  _showSuccessDialog(context);
+                                }
+                              },
+                            ),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Gagal membuat token pembayaran'), backgroundColor: Colors.redAccent),
+                        );
+                      }
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(error), backgroundColor: Colors.redAccent),
+                        SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent),
                       );
-                    } else {
-                      _showSuccessDialog(context);
                     }
                   }
                 },

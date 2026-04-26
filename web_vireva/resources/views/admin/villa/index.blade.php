@@ -44,7 +44,7 @@
                             @else
                                 <div class="w-full h-full flex flex-col items-center justify-center text-slate-300">
                                     <i data-lucide="image" class="w-12 h-12 mb-2"></i>
-                                    <span class="text-xs uppercase tracking-widest font-bold">No Image</span>
+                                    <span class="text-xs uppercase tracking-widest font-bold">Tidak Ada Gambar</span>
                                 </div>
                             @endif
                             <!-- Overlay Gradient -->
@@ -63,11 +63,11 @@
                                     </div>
                                 @elseif($item->status_villa === 'terisi')
                                     <div class="bg-blue-500 text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-md shadow-blue-500/30">
-                                        Occupied
+                                        Terisi
                                     </div>
                                 @else
                                     <div class="bg-red-500 text-white px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-md shadow-red-500/30">
-                                        Maintenance
+                                        Perbaikan
                                     </div>
                                 @endif
                             </div>
@@ -89,11 +89,11 @@
                             <div class="grid grid-cols-2 gap-2 mb-6">
                                 <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-bold text-slate-600 uppercase tracking-tight">
                                     <i data-lucide="bed" class="w-3.5 h-3.5 text-emerald-600"></i>
-                                    {{ $item->jumlah_bedroom }} Bedroom
+                                    {{ $item->jumlah_bedroom }} Kamar Tidur
                                 </div>
                                 <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-bold text-slate-600 uppercase tracking-tight">
                                     <i data-lucide="bath" class="w-3.5 h-3.5 text-emerald-600"></i>
-                                    {{ $item->jumlah_bathroom }} Bath
+                                    {{ $item->jumlah_bathroom }} Kamar Mandi
                                 </div>
                                 <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-bold text-slate-600 uppercase tracking-tight">
                                     <i data-lucide="users" class="w-3.5 h-3.5 text-emerald-600"></i>
@@ -101,13 +101,13 @@
                                 </div>
                                 <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-bold text-slate-600 uppercase tracking-tight">
                                     <i data-lucide="waves" class="w-3.5 h-3.5 text-emerald-600"></i>
-                                    Pool
+                                    Kolam Renang
                                 </div>
                             </div>
                             
                             <div class="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100 mt-auto">
                                 <a href="{{ route('admin.villa.edit', $item->id) }}" class="flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-sm font-bold text-slate-700 transition-all">
-                                    <i data-lucide="edit-3" class="w-4 h-4"></i> Edit
+                                    <i data-lucide="edit-3" class="w-4 h-4"></i> Ubah
                                 </a>
                                 <form action="{{ route('admin.villa.destroy', $item->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus unit villa eksklusif ini?');">
                                     @csrf

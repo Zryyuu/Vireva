@@ -43,8 +43,8 @@
                                     <div>
                                         <h3 class="text-xl font-black text-slate-900 mb-1 group-hover:text-emerald-700 transition-colors">{{ $item->nama_villa }}</h3>
                                         <div class="flex items-center gap-4 text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                                            <span class="flex items-center gap-1.5"><i data-lucide="bed" class="w-3.5 h-3.5 text-emerald-600"></i> {{ $item->jumlah_bedroom }} Bed</span>
-                                            <span class="flex items-center gap-1.5"><i data-lucide="bath" class="w-3.5 h-3.5 text-emerald-600"></i> {{ $item->jumlah_bathroom }} Bath</span>
+                                            <span class="flex items-center gap-1.5"><i data-lucide="bed" class="w-3.5 h-3.5 text-emerald-600"></i> {{ $item->jumlah_bedroom }} Kamar</span>
+                                            <span class="flex items-center gap-1.5"><i data-lucide="bath" class="w-3.5 h-3.5 text-emerald-600"></i> {{ $item->jumlah_bathroom }} Mandi</span>
                                         </div>
                                     </div>
                                 </div>

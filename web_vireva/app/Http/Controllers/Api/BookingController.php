@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Pemesanan;
 use App\Models\Villa;
 use App\Models\Tamu;
+use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -32,10 +33,36 @@ class BookingController extends Controller
             ]
         );
 
-        $villa = Villa::findOrFail($request->villa_id);
-        
         $checkin = Carbon::parse($request->tanggal_checkin);
         $checkout = Carbon::parse($request->tanggal_checkout);
+
+        // Cek overlap booking
+        $isBooked = Pemesanan::where('villa_id', $request->villa_id)
+            ->whereIn('status_pembayaran', ['settlement', 'pending'])
+            ->where(function($query) use ($checkin, $checkout) {
+                $query->whereBetween('tanggal_checkin', [$checkin, $checkout->copy()->subMinute()])
+                      ->orWhereBetween('tanggal_checkout', [$checkin->copy()->addMinute(), $checkout])
+                      ->orWhere(function($q) use ($checkin, $checkout) {
+                          $q->where('tanggal_checkin', '<=', $checkin)
+                            ->where('tanggal_checkout', '>=', $checkout);
+                      });
+            })
+            ->exists();
+
+        if ($isBooked) {
+            return response()->json([
+                'message' => 'Maaf, Villa sudah dipesan untuk tanggal tersebut.'
+            ], 422);
+        }
+
+        $villa = Villa::findOrFail($request->villa_id);
+        
+        // Cek status fisik villa
+        if ($villa->status_villa === 'maintenance') {
+            return response()->json([
+                'message' => 'Maaf, Villa sedang dalam perbaikan.'
+            ], 422);
+        }
         $totalDays = $checkin->diffInDays($checkout);
         $totalBiaya = $totalDays * $villa->harga_permalam;
 
@@ -49,9 +76,20 @@ class BookingController extends Controller
             'status_pemesanan' => 'menunggu',
         ]);
 
+        // Generate Midtrans Snap Token
+        try {
+            $midtrans = new MidtransService();
+            $snapToken = $midtrans->getSnapToken($booking, $user);
+            $booking->update(['snap_token' => $snapToken]);
+        } catch (\Exception $e) {
+            // Jika midtrans gagal, kita biarkan tapi log error
+            \Log::error('Midtrans Error: ' . $e->getMessage());
+        }
+
         return response()->json([
             'message' => 'Pemesanan berhasil dibuat!',
-            'booking' => $booking
+            'booking' => $booking,
+            'snap_token' => $booking->snap_token
         ], 201);
     }
 

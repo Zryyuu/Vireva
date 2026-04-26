@@ -31,10 +31,10 @@
                     <div>
                         <x-input-label for="jabatan" value="Jabatan / Peran" class="text-slate-700 font-bold" />
                         <select id="jabatan" name="jabatan" class="border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl shadow-sm block mt-2 w-full">
-                            <option value="Front Desk Concierge">Front Desk Concierge</option>
-                            <option value="Villa Manager">Villa Manager</option>
-                            <option value="Marketing Staff">Marketing Staff</option>
-                            <option value="Finance & Admin">Finance & Admin</option>
+                            <option value="Front Desk Concierge">Resepsionis / Front Desk</option>
+                            <option value="Villa Manager">Manajer Villa</option>
+                            <option value="Marketing Staff">Staf Pemasaran</option>
+                            <option value="Finance & Admin">Keuangan & Admin</option>
                         </select>
                         <x-input-error :messages="$errors->get('jabatan')" class="mt-2" />
                     </div>

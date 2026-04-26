@@ -16,8 +16,8 @@ class AdminPetugasController extends Controller
      */
     public function index()
     {
-        // Load all users with role 'admin'
-        $users = User::with('petugas')->where('role', 'admin')->get();
+        // Load all users with role 'admin' or 'superadmin'
+        $users = User::with('petugas')->whereIn('role', ['admin', 'superadmin'])->get();
         return view('admin.petugas.index', compact('users'));
     }
 
@@ -124,8 +124,8 @@ class AdminPetugasController extends Controller
     {
         $user = User::findOrFail($id);
 
-        // Proteksi Super Admin (admin pertama di database)
-        if ($user->id === 1 || $user->email === 'admin@gmail.com') {
+        // Proteksi Super Admin (Gunakan role, bukan email)
+        if ($user->role === 'superadmin') {
             return redirect()->route('admin.petugas.index')->with('error', 'Super Admin tidak boleh dihapus dari sistem!');
         }
 

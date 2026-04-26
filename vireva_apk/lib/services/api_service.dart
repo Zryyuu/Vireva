@@ -1,10 +1,16 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 class ApiService {
-  // Gunakan 10.0.2.2 untuk Emulator Android ke Localhost
-  // Gunakan IP laptop Anda jika menggunakan HP Fisik
-  static const String baseUrl = 'http://10.0.2.2:8000/api'; 
+  // Logika otomatis: localhost untuk Web/iOS, 10.0.2.2 untuk Android Emulator
+  static String get baseUrl {
+    if (kIsWeb) {
+      return 'http://127.0.0.1:8000/api';
+    }
+    return 'http://10.0.2.2:8000/api';
+  }
   
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
@@ -29,9 +35,25 @@ class ApiService {
     ));
   }
 
-  Future<Response> post(String path, {Map<String, dynamic>? data}) async {
+  Future<Response> post(String path, {dynamic data}) async {
     try {
       return await _dio.post(path, data: data);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<Response> put(String path, {dynamic data}) async {
+    try {
+      return await _dio.put(path, data: data);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<Response> delete(String path) async {
+    try {
+      return await _dio.delete(path);
     } on DioException catch (e) {
       throw _handleError(e);
     }

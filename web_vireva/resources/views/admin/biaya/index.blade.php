@@ -44,7 +44,10 @@
                                     Rp {{ number_format($biaya->jumlah, 0, ',', '.') }}
                                 </td>
                                 <td class="px-8 py-5">
-                                    <div class="flex justify-center items-center gap-3">
+                                    <div class="flex justify-center items-center gap-2">
+                                        <a href="{{ route('admin.biaya.edit', $biaya->id) }}" class="p-2 text-slate-400 hover:text-emerald-600 transition-colors">
+                                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                        </a>
                                         <form action="{{ route('admin.biaya.destroy', $biaya->id) }}" method="POST" onsubmit="return confirm('Hapus catatan biaya ini?');">
                                             @csrf
                                             @method('DELETE')

@@ -13,7 +13,7 @@ Route::get('/', [LandingController::class, 'index'])->name('landing');
 
 // Auth Routes
 Route::get('/dashboard', function () {
-    if (Auth::user() && Auth::user()->role === 'admin') {
+    if (Auth::user() && in_array(Auth::user()->role, ['admin', 'superadmin'])) {
         return redirect()->route('admin.dashboard');
     }
     return view('dashboard');
@@ -42,11 +42,13 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix
     Route::resource('villa', AdminVillaController::class);
     Route::get('/transaksi', [AdminTransaksiController::class, 'index'])->name('transaksi.index');
     Route::post('/transaksi/{id}/action', [AdminTransaksiController::class, 'processAction'])->name('transaksi.action');
+    Route::get('/reservasi', [\App\Http\Controllers\Admin\AdminReservasiController::class, 'index'])->name('reservasi.index');
 
     // Super Admin Only
     Route::middleware([\App\Http\Middleware\SuperAdminMiddleware::class])->group(function () {
         Route::resource('petugas', AdminPetugasController::class);
         Route::resource('biaya', \App\Http\Controllers\Admin\BiayaController::class);
+        Route::get('/laporan', [\App\Http\Controllers\Admin\AdminLaporanController::class, 'index'])->name('laporan.index');
     });
 });
 

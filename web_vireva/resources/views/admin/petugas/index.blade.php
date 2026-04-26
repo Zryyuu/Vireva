@@ -62,12 +62,12 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4">
-                                @if($user->id === 1 || $user->email === 'admin@gmail.com')
+                                @if($user->isSuperAdmin())
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200 shadow-sm">
                                         <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Super Admin
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-amber-200 shadow-sm">
                                         <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Staff Admin
                                     </span>
                                 @endif
@@ -78,7 +78,7 @@
                                         <i data-lucide="edit-3" class="w-4 h-4"></i>
                                     </a>
                                     
-                                    @if($user->id !== 1 && $user->email !== 'admin@gmail.com' && auth()->id() !== $user->id)
+                                    @if(!$user->isSuperAdmin() && auth()->id() !== $user->id)
                                     <form action="{{ route('admin.petugas.destroy', $user->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus petugas ini? Hak akses mereka ke Dasbor akan dicabut secara permanen.');">
                                         @csrf
                                         @method('DELETE')

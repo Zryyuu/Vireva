@@ -1,0 +1,36 @@
+=========================================
+      AKUN LOGIN VIREVA VILLA
+=========================================
+1. SUPER ADMIN : superadmin@gmail.com / superadmin123
+2. ADMIN       : admin@gmail.com / admin123
+3. GUEST       : tamu@gmail.com / tamu123
+
+=========================================
+   ROADMAP MIDTRANS (PENDING)
+=========================================
+1. Ganti Server/Client Key di .env dengan data asli dari Dashboard Midtrans.
+2. Gunakan Ngrok untuk testing Webhook (Callback) di localhost.
+3. Tambahkan fitur "Cek Status" manual jika notifikasi delay.
+4. Tangani kasus pembayaran expired/cancel di sisi UI Mobile.
+
+=========================================
+   FOKUS UTAMA: CORE CRUD (DASHBOARD)
+=========================================
+- [ ] Analisa menyeluruh fungsi CRUD Villa (Upload foto, edit detail).
+- [ ] Validasi Role-Based Access (Superadmin vs Admin).
+- [ ] Kelola Reservasi (Admin bisa konfirmasi/batal manual).
+- [ ] Laporan & Statistik Dashboard.
+
+
+
+Note:
+-Language (on-proses)
+-Testing system admin dan superadmin(on-progres)
+-Fiks system choose file (web and mobile)
+-buat halaman reservasi di admin and superadmin
+-buat halaman laporan di admin and superadmin
+-Pastikan fitur-fitur admin dan superadmin di mobile itu sudah sesuai (tampilannya di mobile jangan lupa apakah sudah sesuai temanya, dan responsive) dan fiturnya berfungsi atau bisa digunakan dengan baik 
+
+Next:
+-Testing system di user
+-Testing fitur pemesanan dan lain-lain

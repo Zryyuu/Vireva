@@ -5,6 +5,7 @@ import 'core/app_theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/villa_provider.dart';
 import 'providers/booking_provider.dart';
+import 'providers/admin_provider.dart';
 import 'views/onboarding/onboarding_screen.dart';
 import 'views/auth/login_screen.dart';
 import 'views/home/home_screen.dart';
@@ -20,6 +21,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()..checkAuth()),
         ChangeNotifierProvider(create: (_) => VillaProvider()),
         ChangeNotifierProvider(create: (_) => BookingProvider()),
+        ChangeNotifierProvider(create: (_) => AdminProvider()),
       ],
       child: MyApp(showHome: showHome),
     ),

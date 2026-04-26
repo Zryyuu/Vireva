@@ -40,6 +40,9 @@ dependencies:
   cached_network_image: ^3.4.1
   flutter_svg: ^2.0.17
   smooth_page_indicator: ^1.2.0+3
+  webview_flutter: ^4.10.0
+  image_picker: ^1.2.1
+  file_picker: ^11.0.2
 
 dev_dependencies:
   flutter_test:

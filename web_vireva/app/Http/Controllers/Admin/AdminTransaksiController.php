@@ -26,36 +26,44 @@ class AdminTransaksiController extends Controller
         return view('admin.transaksi.index', compact('transaksi', 'statusFilter'));
     }
 
-    /**
-     * Process a manual action on transaction (like processing refund).
-     */
     public function processAction(Request $request, $id)
     {
-        $pemesanan = Pemesanan::with('pembayaran')->findOrFail($id);
+        $pemesanan = Pemesanan::findOrFail($id);
 
-        if ($request->action == 'refund') {
-            if ($pemesanan->status_pemesanan == 'batal' || $pemesanan->status_pemesanan == 'menunggu') {
-                if ($pemesanan->pembayaran && $pemesanan->pembayaran->status_bayar == 'berhasil') {
-                    // Update to refunded
-                    $pemesanan->pembayaran->update([
-                        'status_bayar' => 'refund'
-                    ]);
-                    $pemesanan->update([
-                        'status_pemesanan' => 'batal'
-                    ]);
-                    return redirect()->back()->with('success', 'Dana refund telah disetujui dan dicatat oleh sistem.');
-                }
-            }
-            return redirect()->back()->with('error', 'Transaksi tidak valid untuk proses refund.');
+        // Approve Payment (Manual)
+        if ($request->action == 'approve') {
+            $pemesanan->update([
+                'status_pembayaran' => 'settlement'
+            ]);
+            return redirect()->back()->with('success', 'Pembayaran berhasil dikonfirmasi secara manual.');
         }
 
-        // Additional actions like approving manual transfer could be here
-        if ($request->action == 'approve') {
-            if ($pemesanan->pembayaran) {
-                $pemesanan->pembayaran->update(['status_bayar' => 'berhasil']);
+        // Process Check-in
+        if ($request->action == 'checkin') {
+            if ($pemesanan->status_pembayaran !== 'settlement') {
+                return redirect()->back()->with('error', 'Tamu belum melunasi pembayaran.');
             }
+            
             $pemesanan->update(['status_pemesanan' => 'aktif']);
-            return redirect()->back()->with('success', 'Pembayaran disetujui. Status reservasi menjadi aktif.');
+            $pemesanan->villa->update(['status_villa' => 'terisi']);
+            
+            return redirect()->back()->with('success', 'Tamu berhasil Check-in. Unit villa sekarang berstatus TERISI.');
+        }
+
+        // Process Check-out
+        if ($request->action == 'checkout') {
+            $pemesanan->update(['status_pemesanan' => 'selesai']);
+            $pemesanan->villa->update(['status_villa' => 'tersedia']);
+            
+            return redirect()->back()->with('success', 'Tamu berhasil Check-out. Unit villa sekarang TERSEDIA kembali.');
+        }
+
+        // Cancel Transaction
+        if ($request->action == 'cancel') {
+            $pemesanan->update(['status_pemesanan' => 'batal']);
+            $pemesanan->villa->update(['status_villa' => 'tersedia']);
+            
+            return redirect()->back()->with('success', 'Reservasi berhasil dibatalkan.');
         }
 
         return redirect()->back()->with('error', 'Aksi tidak dikenal.');

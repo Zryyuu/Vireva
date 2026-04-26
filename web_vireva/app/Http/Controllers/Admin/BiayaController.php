@@ -34,6 +34,26 @@ class BiayaController extends Controller
         return redirect()->route('admin.biaya.index')->with('success', 'Catatan biaya berhasil ditambahkan.');
     }
 
+    public function edit(Biaya $biaya)
+    {
+        return view('admin.biaya.edit', compact('biaya'));
+    }
+
+    public function update(Request $request, Biaya $biaya)
+    {
+        $request->validate([
+            'item_biaya' => 'required|string|max:255',
+            'jumlah' => 'required|numeric|min:0',
+            'kategori' => 'required|string',
+            'tanggal' => 'required|date',
+            'keterangan' => 'nullable|string',
+        ]);
+
+        $biaya->update($request->all());
+
+        return redirect()->route('admin.biaya.index')->with('success', 'Catatan biaya berhasil diperbarui.');
+    }
+
     public function destroy(Biaya $biaya)
     {
         $biaya->delete();

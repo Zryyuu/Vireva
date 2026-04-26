@@ -51,7 +51,7 @@
                                 </div>
                                 <div>
                                     <h4 class="font-bold text-slate-900 text-sm">Kamar Tidur</h4>
-                                    <p class="text-xs text-slate-500 mt-0.5">{{ $villa->jumlah_bedroom }} Bedrooms</p>
+                                    <p class="text-xs text-slate-500 mt-0.5">{{ $villa->jumlah_bedroom }} Kamar Tidur</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100">
@@ -60,7 +60,7 @@
                                 </div>
                                 <div>
                                     <h4 class="font-bold text-slate-900 text-sm">Kamar Mandi</h4>
-                                    <p class="text-xs text-slate-500 mt-0.5">{{ $villa->jumlah_bathroom }} Bathrooms</p>
+                                    <p class="text-xs text-slate-500 mt-0.5">{{ $villa->jumlah_bathroom }} Kamar Mandi</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100">

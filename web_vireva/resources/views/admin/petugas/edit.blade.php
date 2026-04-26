@@ -33,10 +33,10 @@
                         <x-input-label for="jabatan" value="Jabatan / Peran" class="text-slate-700 font-bold" />
                         <select id="jabatan" name="jabatan" class="border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl shadow-sm block mt-2 w-full">
                             @php $curr_jabatan = old('jabatan', $user->petugas ? $user->petugas->jabatan : ''); @endphp
-                            <option value="Front Desk Concierge" {{ $curr_jabatan == 'Front Desk Concierge' ? 'selected' : '' }}>Front Desk Concierge</option>
-                            <option value="Villa Manager" {{ $curr_jabatan == 'Villa Manager' ? 'selected' : '' }}>Villa Manager</option>
-                            <option value="Marketing Staff" {{ $curr_jabatan == 'Marketing Staff' ? 'selected' : '' }}>Marketing Staff</option>
-                            <option value="Finance & Admin" {{ $curr_jabatan == 'Finance & Admin' ? 'selected' : '' }}>Finance & Admin</option>
+                            <option value="Front Desk Concierge" {{ $curr_jabatan == 'Front Desk Concierge' ? 'selected' : '' }}>Resepsionis / Front Desk</option>
+                            <option value="Villa Manager" {{ $curr_jabatan == 'Villa Manager' ? 'selected' : '' }}>Manajer Villa</option>
+                            <option value="Marketing Staff" {{ $curr_jabatan == 'Marketing Staff' ? 'selected' : '' }}>Staf Pemasaran</option>
+                            <option value="Finance & Admin" {{ $curr_jabatan == 'Finance & Admin' ? 'selected' : '' }}>Keuangan & Admin</option>
                             @if(!in_array($curr_jabatan, ['Front Desk Concierge', 'Villa Manager', 'Marketing Staff', 'Finance & Admin']) && $curr_jabatan != '')
                                 <option value="{{ $curr_jabatan }}" selected>{{ $curr_jabatan }}</option>
                             @endif

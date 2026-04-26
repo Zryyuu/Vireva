@@ -131,7 +131,6 @@
         </div>
     </section>
 
-
     <div id="services" class="bg-white pt-24 pb-12 lg:pt-32 lg:pb-16 text-center animate__animated animate__fadeInUp">
         <div class="max-w-7xl mx-auto px-6">
             <span class="inline-block py-1 px-4 rounded-full border border-dark/10 bg-light text-[10px] font-bold uppercase tracking-[0.2em] text-dark/60 mb-5">Vireva Experience</span>
@@ -141,6 +140,7 @@
             </p>
         </div>
     </div>
+
 
     <!-- Fasilitas Dimulai (Restored Cinematic Panels) -->
     <section id="services" class="min-h-screen lg:h-[80vh] lg:min-h-[600px] bg-dark flex flex-col lg:flex-row overflow-hidden relative group/section">
