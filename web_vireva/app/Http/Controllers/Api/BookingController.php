@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Pemesanan;
 use App\Models\Villa;
 use App\Models\Tamu;
-use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class BookingController extends Controller
 {
@@ -74,23 +74,42 @@ class BookingController extends Controller
             'total_hari' => $totalDays,
             'total_biaya' => $totalBiaya,
             'status_pemesanan' => 'menunggu',
+            'metode_pembayaran' => 'transfer',
+            'status_pembayaran' => 'pending',
         ]);
 
-        // Generate Midtrans Snap Token
-        try {
-            $midtrans = new MidtransService();
-            $snapToken = $midtrans->getSnapToken($booking, $user);
-            $booking->update(['snap_token' => $snapToken]);
-        } catch (\Exception $e) {
-            // Jika midtrans gagal, kita biarkan tapi log error
-            \Log::error('Midtrans Error: ' . $e->getMessage());
+        return response()->json([
+            'message' => 'Pemesanan berhasil dibuat! Silakan upload bukti pembayaran.',
+            'booking' => $booking
+        ], 201);
+    }
+
+    public function uploadBukti(Request $request, $id)
+    {
+        $request->validate([
+            'bukti_pembayaran' => 'required|image|max:5120', // Max 5MB
+        ]);
+
+        $booking = Pemesanan::findOrFail($id);
+        
+        // Authorization check (Hanya pemilik booking yang bisa upload)
+        $tamu = Tamu::where('user_id', $request->user()->id)->first();
+        if ($booking->tamu_id !== $tamu->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($request->hasFile('bukti_pembayaran')) {
+            if ($booking->bukti_pembayaran) {
+                Storage::disk('public')->delete($booking->bukti_pembayaran);
+            }
+            $path = $request->file('bukti_pembayaran')->store('pembayaran', 'public');
+            $booking->update(['bukti_pembayaran' => $path]);
         }
 
         return response()->json([
-            'message' => 'Pemesanan berhasil dibuat!',
-            'booking' => $booking,
-            'snap_token' => $booking->snap_token
-        ], 201);
+            'message' => 'Bukti pembayaran berhasil diupload. Menunggu verifikasi admin.',
+            'data' => $booking
+        ]);
     }
 
     public function index(Request $request)

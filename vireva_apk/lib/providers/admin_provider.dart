@@ -1,28 +1,42 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/api_service.dart';
+import '../core/providers.dart';
 
-class AdminProvider with ChangeNotifier {
-  Map<String, dynamic>? _stats;
-  bool _isLoading = false;
-  final ApiService _apiService = ApiService();
+class AdminState {
+  final Map<String, dynamic>? stats;
+  final bool isLoading;
 
-  Map<String, dynamic>? get stats => _stats;
-  bool get isLoading => _isLoading;
+  AdminState({this.stats, this.isLoading = false});
+
+  AdminState copyWith({Map<String, dynamic>? stats, bool? isLoading}) {
+    return AdminState(
+      stats: stats ?? this.stats,
+      isLoading: isLoading ?? this.isLoading,
+    );
+  }
+}
+
+class AdminNotifier extends StateNotifier<AdminState> {
+  final ApiService _apiService;
+
+  AdminNotifier(this._apiService) : super(AdminState());
 
   Future<void> fetchStats() async {
-    _isLoading = true;
-    notifyListeners();
+    state = state.copyWith(isLoading: true);
 
     try {
       final response = await _apiService.get('/admin/stats');
       if (response.statusCode == 200) {
-        _stats = response.data;
+        state = state.copyWith(stats: response.data, isLoading: false);
+      } else {
+        state = state.copyWith(isLoading: false);
       }
     } catch (e) {
-      debugPrint('Error fetching admin stats: $e');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      state = state.copyWith(isLoading: false);
     }
   }
 }
+
+final adminProvider = StateNotifierProvider<AdminNotifier, AdminState>((ref) {
+  return AdminNotifier(ref.watch(apiServiceProvider));
+});

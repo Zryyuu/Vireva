@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:provider/provider.dart';
 import 'core/app_theme.dart';
 import 'providers/auth_provider.dart';
-import 'providers/villa_provider.dart';
-import 'providers/booking_provider.dart';
-import 'providers/admin_provider.dart';
 import 'views/onboarding/onboarding_screen.dart';
 import 'views/auth/login_screen.dart';
 import 'views/home/home_screen.dart';
@@ -16,34 +13,42 @@ void main() async {
   final showHome = prefs.getBool('showHome') ?? false;
 
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()..checkAuth()),
-        ChangeNotifierProvider(create: (_) => VillaProvider()),
-        ChangeNotifierProvider(create: (_) => BookingProvider()),
-        ChangeNotifierProvider(create: (_) => AdminProvider()),
-      ],
+    ProviderScope(
       child: MyApp(showHome: showHome),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerStatefulWidget {
   final bool showHome;
   
   const MyApp({super.key, required this.showHome});
 
   @override
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends ConsumerState<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(authProvider.notifier).checkAuth();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    final auth = ref.watch(authProvider);
     
     return MaterialApp(
+      key: ValueKey(auth.isAuthenticated),
       title: 'Vireva Luxury',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: !showHome 
-          ? const OnboardingScreen() 
-          : (auth.isAuthenticated ? const HomeScreen() : const LoginScreen()),
+      home: auth.isAuthenticated 
+          ? const HomeScreen() 
+          : (!widget.showHome ? const OnboardingScreen() : const LoginScreen()),
     );
   }
 }

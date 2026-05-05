@@ -30,17 +30,29 @@
         @php
             // Execute real queries for the dashboard metrics
             $totalVillas = \App\Models\Villa::count();
-            $activeBookings = \App\Models\Pemesanan::whereIn('status_pemesanan', ['menunggu', 'aktif'])->count();
             
-            // Financial Metrics
-            $grossRevenue = \App\Models\Pemesanan::where('status_pemesanan', 'selesai')->sum('total_biaya');
-            $totalExpenses = \App\Models\Biaya::sum('jumlah');
+            // 1. Reservasi Terjadwal (Status Menunggu - yang sudah booking tapi belum masuk)
+            $scheduledReservations = \App\Models\Pemesanan::where('status_pemesanan', 'menunggu')->count();
+
+            // 2. Check-in Hari Ini (Status Menunggu & Tanggal Check-in Hari Ini)
+            $todayCheckins = \App\Models\Pemesanan::whereDate('tanggal_checkin', today())
+                                ->where('status_pemesanan', 'menunggu')
+                                ->count();
+
+            // 3. Tamu Menginap / Aktif (Status Aktif)
+            $currentlyStaying = \App\Models\Pemesanan::where('status_pemesanan', 'aktif')->count();
+            
+            // Financial Metrics (Super Admin Only) - Filtered by Current Month
+            $grossRevenue = \App\Models\Pemesanan::where('status_pemesanan', 'selesai')
+                                ->whereMonth('created_at', now()->month)
+                                ->whereYear('created_at', now()->year)
+                                ->sum('total_biaya');
+            
+            $totalExpenses = \App\Models\Biaya::whereMonth('tanggal', now()->month)
+                                ->whereYear('tanggal', now()->year)
+                                ->sum('jumlah');
+                                
             $netProfit = $grossRevenue - $totalExpenses;
-            
-            // Guests currently active (checked in)
-            $activeGuests = \App\Models\Pemesanan::where('status_pemesanan', 'aktif')
-                                ->distinct('tamu_id')
-                                ->count('tamu_id');
                                 
             $recentBookings = \App\Models\Pemesanan::with(['tamu.user', 'villa'])
                                 ->orderBy('created_at', 'desc')
@@ -66,39 +78,43 @@
         @endphp
 
         <!-- Dashboard Metrics Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="space-y-6">
             @if(Auth::user()->isSuperAdmin())
-                <!-- Super Admin Financial Metrics -->
-                <x-vireva.metric-card 
-                    title="Pendapatan Kotor" 
-                    :value="$grossRevenue" 
-                    icon="wallet" 
-                    color="slate" 
-                    :trend="12.5" 
-                    isCurrency 
-                />
+                <!-- Super Admin Financial Row -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <x-vireva.metric-card 
+                        title="Pendapatan (Bulan Ini)" 
+                        :value="$grossRevenue" 
+                        icon="wallet" 
+                        color="slate" 
+                        subtitle="Pemasukan kotor lunas" 
+                        isCurrency 
+                    />
 
-                <x-vireva.metric-card 
-                    title="Total Pengeluaran" 
-                    :value="$totalExpenses" 
-                    icon="trending-down" 
-                    color="red" 
-                    subtitle="Biaya operasional tercatat" 
-                    isCurrency 
-                />
+                    <x-vireva.metric-card 
+                        title="Pengeluaran (Bulan Ini)" 
+                        :value="$totalExpenses" 
+                        icon="trending-down" 
+                        color="red" 
+                        subtitle="Operasional bulan ini" 
+                        isCurrency 
+                    />
 
+                    <x-vireva.metric-card 
+                        title="Laba Bersih (Bulan Ini)" 
+                        :value="$netProfit" 
+                        icon="activity" 
+                        color="emerald" 
+                        :subtitle="'Margin: ' . ($grossRevenue > 0 ? number_format(($netProfit / $grossRevenue) * 100, 1) : 0) . '%'" 
+                        isCurrency 
+                    />
+                </div>
+            @endif
+
+            <!-- Common Operational Row (3 Cards) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <x-vireva.metric-card 
-                    title="Laba Bersih" 
-                    :value="$netProfit" 
-                    icon="activity" 
-                    color="emerald" 
-                    :subtitle="'Margin: ' . ($grossRevenue > 0 ? number_format(($netProfit / $grossRevenue) * 100, 1) : 0) . '%'" 
-                    isCurrency 
-                />
-            @else
-                <!-- Regular Admin Operational Metrics -->
-                <x-vireva.metric-card 
-                    title="Katalog Villa" 
+                    title="Daftar Villa" 
                     :value="$totalVillas" 
                     icon="home" 
                     color="slate" 
@@ -106,30 +122,21 @@
                 />
 
                 <x-vireva.metric-card 
-                    title="Tamu Terdaftar" 
-                    :value="$activeGuests" 
-                    icon="users" 
+                    title="Reservasi Terjadwal" 
+                    :value="$scheduledReservations" 
+                    icon="calendar" 
                     color="emerald" 
-                    subtitle="Member aktif" 
+                    subtitle="Menunggu check-in" 
                 />
 
                 <x-vireva.metric-card 
-                    title="Check-In Hari Ini" 
-                    :value="\App\Models\Pemesanan::whereDate('tanggal_checkin', today())->count()" 
-                    icon="clock" 
+                    title="Tamu Menginap" 
+                    :value="$currentlyStaying . ' Unit'" 
+                    icon="door-closed" 
                     color="blue" 
-                    subtitle="Reservasi terjadwal" 
+                    subtitle="Sedang aktif menginap" 
                 />
-            @endif
-
-            <!-- Common Operational Metric -->
-            <x-vireva.metric-card 
-                title="Okupansi Aktif" 
-                :value="$activeBookings . ' Unit'" 
-                icon="calendar-check" 
-                color="blue" 
-                :subtitle="'Dari total ' . $totalVillas . ' unit villa'" 
-            />
+            </div>
         </div>
 
         @if(Auth::user()->isSuperAdmin())
@@ -267,7 +274,7 @@
                                     <i data-lucide="layout-grid" class="w-5 h-5"></i>
                                 </div>
                                 <div>
-                                    <div class="text-sm font-bold text-slate-900">Katalog Villa</div>
+                                    <div class="text-sm font-bold text-slate-900">Daftar Villa</div>
                                     <div class="text-xs text-slate-500 font-medium">Manajemen harga & unit</div>
                                 </div>
                             </div>

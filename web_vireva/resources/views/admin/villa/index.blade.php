@@ -40,7 +40,7 @@
                         <!-- Image Area -->
                         <div class="relative h-56 xl:h-64 overflow-hidden bg-slate-100">
                             @if($item->foto)
-                                <img src="{{ asset('storage/' . $item->foto) }}" alt="Villa {{ $item->nama_villa }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                                <img src="{{ $item->image_url }}" alt="Villa {{ $item->nama_villa }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                             @else
                                 <div class="w-full h-full flex flex-col items-center justify-center text-slate-300">
                                     <i data-lucide="image" class="w-12 h-12 mb-2"></i>

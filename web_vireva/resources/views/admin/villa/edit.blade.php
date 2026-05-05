@@ -34,31 +34,31 @@
 
                     <div>
                         <x-input-label for="harga_permalam" value="Harga Per Malam (Rp)" class="text-slate-700 font-bold" />
-                        <x-text-input id="harga_permalam" class="block mt-2 w-full border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl" type="number" name="harga_permalam" :value="old('harga_permalam', $villa->harga_permalam)" required />
+                        <x-text-input id="harga_permalam" class="block mt-2 w-full border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl" type="number" name="harga_permalam" :value="old('harga_permalam', $villa->harga_permalam)" min="1000" required />
                         <x-input-error :messages="$errors->get('harga_permalam')" class="mt-2" />
                     </div>
 
                     <div>
                         <x-input-label for="kapasitas" value="Kapasitas Tamu" class="text-slate-700 font-bold" />
-                        <x-text-input id="kapasitas" class="block mt-2 w-full border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl" type="number" name="kapasitas" :value="old('kapasitas', $villa->kapasitas)" required />
+                        <x-text-input id="kapasitas" class="block mt-2 w-full border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl" type="number" name="kapasitas" :value="old('kapasitas', $villa->kapasitas)" min="1" max="50" required />
                         <x-input-error :messages="$errors->get('kapasitas')" class="mt-2" />
                     </div>
 
                     <div>
                         <x-input-label for="jumlah_bedroom" value="Jumlah Kamar Tidur" class="text-slate-700 font-bold" />
-                        <x-text-input id="jumlah_bedroom" class="block mt-2 w-full border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl" type="number" name="jumlah_bedroom" :value="old('jumlah_bedroom', $villa->jumlah_bedroom)" required />
+                        <x-text-input id="jumlah_bedroom" class="block mt-2 w-full border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl" type="number" name="jumlah_bedroom" :value="old('jumlah_bedroom', $villa->jumlah_bedroom)" min="1" max="20" required />
                         <x-input-error :messages="$errors->get('jumlah_bedroom')" class="mt-2" />
                     </div>
 
                     <div>
                         <x-input-label for="jumlah_bathroom" value="Jumlah Kamar Mandi" class="text-slate-700 font-bold" />
-                        <x-text-input id="jumlah_bathroom" class="block mt-2 w-full border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl" type="number" name="jumlah_bathroom" :value="old('jumlah_bathroom', $villa->jumlah_bathroom)" required />
+                        <x-text-input id="jumlah_bathroom" class="block mt-2 w-full border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl" type="number" name="jumlah_bathroom" :value="old('jumlah_bathroom', $villa->jumlah_bathroom)" min="1" max="20" required />
                         <x-input-error :messages="$errors->get('jumlah_bathroom')" class="mt-2" />
                     </div>
 
                     <div>
                         <x-input-label for="luas_bangunan" value="Luas Bangunan (m²)" class="text-slate-700 font-bold" />
-                        <x-text-input id="luas_bangunan" class="block mt-2 w-full border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl" type="number" name="luas_bangunan" :value="old('luas_bangunan', $villa->luas_bangunan)" />
+                        <x-text-input id="luas_bangunan" class="block mt-2 w-full border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl" type="number" name="luas_bangunan" :value="old('luas_bangunan', $villa->luas_bangunan)" min="1" max="5000" />
                         <x-input-error :messages="$errors->get('luas_bangunan')" class="mt-2" />
                     </div>
                 </div>
@@ -74,60 +74,106 @@
                 </div>
 
                 <div class="mt-8">
-                    <x-input-label for="foto" value="Perbarui Foto Villa" class="text-slate-700 font-bold" />
-                    <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        @if($villa->foto)
-                            <div id="current-photo">
-                                <div class="flex items-center gap-2 mb-3">
-                                    <i data-lucide="image" class="w-4 h-4 text-slate-400"></i>
-                                    <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Foto Saat Ini</span>
-                                </div>
-                                <img src="{{ Storage::url($villa->foto) }}" class="w-full max-h-48 object-cover rounded-[2rem] border border-slate-200 shadow-sm">
-                            </div>
-                        @endif
+                    <div class="flex items-center justify-between mb-4">
+                        <x-input-label value="Manajemen Galeri Villa" class="text-slate-700 font-bold" />
+                        <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg uppercase tracking-wider">Multi-Image Mode</span>
+                    </div>
 
-                        <div class="{{ $villa->foto ? '' : 'md:col-span-2' }}">
-                            <div class="flex items-center gap-2 mb-3">
-                                <i data-lucide="upload-cloud" class="w-4 h-4 text-emerald-600"></i>
-                                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Upload Foto Baru</span>
-                            </div>
-                            <label for="foto" class="flex flex-col items-center justify-center w-full h-48 border-2 border-slate-200 border-dashed rounded-[2rem] cursor-pointer bg-slate-50 hover:bg-emerald-50/50 hover:border-emerald-200 transition-all group">
-                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-400 group-hover:text-emerald-600 shadow-sm mb-3 transition-colors">
-                                        <i data-lucide="image-plus" class="w-5 h-5"></i>
+                    <!-- Existing Gallery -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i data-lucide="image" class="w-4 h-4 text-slate-400"></i>
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Foto Saat Ini (Klik X untuk Hapus)</span>
+                        </div>
+                        
+                        <div id="existing-gallery-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                            @if($villa->foto && is_array($villa->foto))
+                                @foreach($villa->foto as $index => $path)
+                                    <div class="relative group aspect-video rounded-2xl overflow-hidden border border-slate-200 shadow-sm transition-all hover:shadow-md" id="photo-{{ $index }}">
+                                        <img src="{{ asset('storage/' . $path) }}" class="w-full h-full object-cover">
+                                        <input type="hidden" name="old_foto[]" value="{{ $path }}">
+                                        <button type="button" onclick="removeExistingImage('photo-{{ $index }}')" class="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg">
+                                            <i data-lucide="x" class="w-4 h-4"></i>
+                                        </button>
                                     </div>
-                                    <p class="text-xs text-slate-600 font-bold">Pilih file baru</p>
+                                @endforeach
+                            @elseif($villa->foto)
+                                <div class="relative group aspect-video rounded-2xl overflow-hidden border border-slate-200 shadow-sm" id="photo-0">
+                                    <img src="{{ asset('storage/' . $villa->foto) }}" class="w-full h-full object-cover">
+                                    <input type="hidden" name="old_foto[]" value="{{ $villa->foto }}">
+                                    <button type="button" onclick="removeExistingImage('photo-0')" class="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg">
+                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                    </button>
                                 </div>
-                                <input id="foto" type="file" name="foto" class="hidden" onchange="previewImage(this)" />
-                            </label>
+                            @endif
                         </div>
                     </div>
 
-                    <div id="preview-container" class="mt-6 hidden">
+                    <!-- Upload New Photos -->
+                    <div class="mt-8">
                         <div class="flex items-center gap-2 mb-3">
+                            <i data-lucide="upload-cloud" class="w-4 h-4 text-emerald-600"></i>
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Tambah Foto Baru ke Galeri</span>
+                        </div>
+                        <label for="foto" class="flex flex-col items-center justify-center w-full h-40 border-2 border-slate-200 border-dashed rounded-[2rem] cursor-pointer bg-slate-50 hover:bg-emerald-50/50 hover:border-emerald-200 transition-all group">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-400 group-hover:text-emerald-600 shadow-sm mb-3 transition-colors">
+                                    <i data-lucide="images" class="w-5 h-5"></i>
+                                </div>
+                                <p class="text-xs text-slate-600 font-bold text-center px-4">Seret atau pilih banyak foto baru untuk ditambahkan</p>
+                            </div>
+                            <input id="foto" type="file" name="foto[]" class="hidden" multiple onchange="previewNewImages(this)" />
+                        </label>
+                    </div>
+
+                    <!-- New Photos Preview -->
+                    <div id="new-preview-wrapper" class="mt-6 hidden">
+                        <div class="flex items-center gap-2 mb-4">
                             <i data-lucide="eye" class="w-4 h-4 text-emerald-600"></i>
                             <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Pratinjau Foto Baru</span>
                         </div>
-                        <img id="preview-img" src="#" class="w-full max-h-80 object-cover rounded-[2rem] border border-slate-200 shadow-sm" />
+                        <div id="new-preview-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <!-- New previews injected here -->
+                        </div>
                     </div>
                     <x-input-error :messages="$errors->get('foto')" class="mt-2" />
                 </div>
 
                 <script>
-                    function previewImage(input) {
-                        const container = document.getElementById('preview-container');
-                        const img = document.getElementById('preview-img');
+                    function removeExistingImage(id) {
+                        if (confirm('Hapus foto ini dari galeri? (Perubahan akan disimpan setelah Anda mengklik Update)')) {
+                            const element = document.getElementById(id);
+                            element.style.transform = 'scale(0.8)';
+                            element.style.opacity = '0';
+                            setTimeout(() => element.remove(), 300);
+                        }
+                    }
+
+                    function previewNewImages(input) {
+                        const wrapper = document.getElementById('new-preview-wrapper');
+                        const grid = document.getElementById('new-preview-grid');
+                        grid.innerHTML = '';
                         
-                        if (input.files && input.files[0]) {
-                            const reader = new FileReader();
-                            reader.onload = function(e) {
-                                img.src = e.target.result;
-                                container.classList.remove('hidden');
-                                // Optionally hide current photo
-                                const currentPhoto = document.getElementById('current-photo');
-                                if (currentPhoto) currentPhoto.style.opacity = '0.5';
-                            }
-                            reader.readAsDataURL(input.files[0]);
+                        if (input.files && input.files.length > 0) {
+                            wrapper.classList.remove('hidden');
+                            
+                            Array.from(input.files).forEach(file => {
+                                const reader = new FileReader();
+                                reader.onload = function(e) {
+                                    const div = document.createElement('div');
+                                    div.className = 'relative group aspect-video overflow-hidden rounded-2xl border border-slate-200 shadow-sm';
+                                    div.innerHTML = `
+                                        <img src="${e.target.result}" class="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                        <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
+                                            BARU
+                                        </div>
+                                    `;
+                                    grid.appendChild(div);
+                                }
+                                reader.readAsDataURL(file);
+                            });
+                        } else {
+                            wrapper.classList.add('hidden');
                         }
                     }
                 </script>

@@ -34,6 +34,10 @@ class MidtransService
                     'name' => 'Reservasi Villa (Order #' . $booking->id . ')',
                 ]
             ],
+            'expiry' => [
+                'unit' => 'minute',
+                'duration' => 5
+            ],
         ];
 
         return Snap::getSnapToken($params);

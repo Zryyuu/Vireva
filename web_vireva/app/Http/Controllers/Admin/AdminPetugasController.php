@@ -36,7 +36,6 @@ class AdminPetugasController extends Controller
     {
         $request->validate([
             'nama_petugas' => ['required', 'string', 'max:255'],
-            'jabatan' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
@@ -51,7 +50,7 @@ class AdminPetugasController extends Controller
         Petugas::create([
             'user_id' => $user->id,
             'nama_petugas' => $request->nama_petugas,
-            'jabatan' => $request->jabatan,
+            'jabatan' => 'Admin Vireva',
         ]);
 
         return redirect()->route('admin.petugas.index')->with('success', 'Petugas baru berhasil didaftarkan.');
@@ -85,7 +84,6 @@ class AdminPetugasController extends Controller
 
         $request->validate([
             'nama_petugas' => ['required', 'string', 'max:255'],
-            'jabatan' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class.',email,'.$user->id],
             'password' => ['nullable', 'confirmed', Password::defaults()],
         ]);
@@ -104,13 +102,13 @@ class AdminPetugasController extends Controller
         if ($user->petugas) {
             $user->petugas->update([
                 'nama_petugas' => $request->nama_petugas,
-                'jabatan' => $request->jabatan,
+                'jabatan' => 'Admin Vireva',
             ]);
         } else {
             Petugas::create([
                 'user_id' => $user->id,
                 'nama_petugas' => $request->nama_petugas,
-                'jabatan' => $request->jabatan,
+                'jabatan' => 'Admin Vireva',
             ]);
         }
 

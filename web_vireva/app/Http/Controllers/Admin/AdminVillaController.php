@@ -25,19 +25,24 @@ class AdminVillaController extends Controller
         $validated = $request->validate([
             'nama_villa' => 'required|unique:villas',
             'tipe_villa' => 'required',
-            'harga_permalam' => 'required|numeric',
-            'jumlah_bedroom' => 'required|integer',
-            'jumlah_bathroom' => 'required|integer',
-            'luas_bangunan' => 'nullable|integer',
-            'kapasitas' => 'required|integer',
+            'harga_permalam' => 'required|numeric|min:1000',
+            'jumlah_bedroom' => 'required|integer|min:1|max:20',
+            'jumlah_bathroom' => 'required|integer|min:1|max:20',
+            'luas_bangunan' => 'nullable|integer|min:1|max:5000',
+            'kapasitas' => 'required|integer|min:1|max:50',
             'deskripsi' => 'nullable',
-            'foto' => 'nullable|image|max:2048',
+            'foto' => 'nullable|array',
+            'foto.*' => 'image|max:10240',
             'fasilitas' => 'nullable|array',
         ]);
 
+        $fotoPaths = [];
         if ($request->hasFile('foto')) {
-            $validated['foto'] = $request->file('foto')->store('villas', 'public');
+            foreach ($request->file('foto') as $file) {
+                $fotoPaths[] = $file->store('villas', 'public');
+            }
         }
+        $validated['foto'] = $fotoPaths;
 
         Villa::create($validated);
 
@@ -54,23 +59,39 @@ class AdminVillaController extends Controller
         $validated = $request->validate([
             'nama_villa' => 'required|unique:villas,nama_villa,' . $villa->id,
             'tipe_villa' => 'required',
-            'harga_permalam' => 'required|numeric',
-            'jumlah_bedroom' => 'required|integer',
-            'jumlah_bathroom' => 'required|integer',
-            'luas_bangunan' => 'nullable|integer',
-            'kapasitas' => 'required|integer',
+            'harga_permalam' => 'required|numeric|min:1000',
+            'jumlah_bedroom' => 'required|integer|min:1|max:20',
+            'jumlah_bathroom' => 'required|integer|min:1|max:20',
+            'luas_bangunan' => 'nullable|integer|min:1|max:5000',
+            'kapasitas' => 'required|integer|min:1|max:50',
             'deskripsi' => 'nullable',
-            'foto' => 'nullable|image|max:2048',
+            'foto' => 'nullable|array',
+            'foto.*' => 'image|max:10240',
             'fasilitas' => 'nullable|array',
             'status_villa' => 'required|in:tersedia,terisi,maintenance',
         ]);
 
-        if ($request->hasFile('foto')) {
-            if ($villa->foto) {
-                Storage::disk('public')->delete($villa->foto);
+        // Handle existing photos
+        $existingPhotos = $villa->foto ?? [];
+        $keepPhotos = $request->input('old_foto', []);
+        
+        // Delete photos that were removed in the UI
+        foreach ($existingPhotos as $photo) {
+            if (!in_array($photo, $keepPhotos)) {
+                Storage::disk('public')->delete($photo);
             }
-            $validated['foto'] = $request->file('foto')->store('villas', 'public');
         }
+        
+        $fotoPaths = $keepPhotos;
+
+        // Handle new uploads
+        if ($request->hasFile('foto')) {
+            foreach ($request->file('foto') as $file) {
+                $fotoPaths[] = $file->store('villas', 'public');
+            }
+        }
+        
+        $validated['foto'] = $fotoPaths;
 
         $villa->update($validated);
 
@@ -83,7 +104,11 @@ class AdminVillaController extends Controller
             return back()->with('error', 'Villa tidak dapat dihapus karena memiliki reservasi aktif.');
         }
 
-        if ($villa->foto) {
+        if ($villa->foto && is_array($villa->foto)) {
+            foreach ($villa->foto as $photo) {
+                Storage::disk('public')->delete($photo);
+            }
+        } elseif ($villa->foto) {
             Storage::disk('public')->delete($villa->foto);
         }
 

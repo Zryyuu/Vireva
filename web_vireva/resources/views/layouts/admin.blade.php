@@ -56,16 +56,35 @@
             .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
             .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
             .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+            /* Custom Form Select Styling */
+            .form-select {
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+                background-position: right 0.5rem center;
+                background-repeat: no-repeat;
+                background-size: 1.5em 1.5em;
+                padding-right: 2.5rem;
+                transition: all 0.2s ease;
+            }
+            .form-select:hover {
+                border-color: #059669; /* emerald-600 */
+            }
+            .form-select:focus {
+                outline: none;
+                border-color: #059669;
+                ring: 2px;
+                ring-color: rgba(5, 150, 105, 0.2);
+            }
         </style>
     </head>
-    <body class="antialiased overflow-hidden selection:bg-slate-200">
-        <div class="flex h-screen bg-light-pattern bg-slate-50" x-data="{ sidebarOpen: false }">
+    <body class="antialiased selection:bg-slate-200">
+        <div class="flex min-h-screen bg-light-pattern bg-slate-50" x-data="{ sidebarOpen: false }">
             
             <!-- Mobile Sidebar Overlay -->
             <div x-show="sidebarOpen" class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden" @click="sidebarOpen = false" style="display: none;"></div>
 
             <!-- Sidebar -->
-            <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-50 w-72 h-screen transition-transform duration-300 lg:static lg:translate-x-0 flex flex-col bg-white border-r border-slate-200">
+            <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-50 w-72 min-h-screen transition-transform duration-300 lg:sticky lg:top-0 lg:translate-x-0 flex flex-col bg-white border-r border-slate-200 relative">
                 
                 <!-- Logo Area -->
                 <div class="h-20 flex items-center px-8 border-b border-slate-100 shrink-0">
@@ -75,7 +94,7 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1 custom-scrollbar">
+                <nav class="flex-1 overflow-y-auto py-6 px-4 pb-32 space-y-1 custom-scrollbar">
                     
                     <div class="text-[10px] uppercase font-bold tracking-widest text-slate-400 px-4 mb-2 mt-2">Utama</div>
                     <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -90,11 +109,21 @@
                     <a href="{{ route('admin.petugas.index') }}" class="sidebar-link {{ request()->routeIs('admin.petugas.*') ? 'active' : '' }}">
                         <i data-lucide="shield-check" class="w-5 h-5"></i> Kelola Staff
                     </a>
+                    <a href="{{ route('admin.tamu.index') }}" class="sidebar-link {{ request()->routeIs('admin.tamu.*') ? 'active' : '' }}">
+                        <i data-lucide="users" class="w-5 h-5"></i> Lihat Tamu
+                    </a>
+                    @endif
+
+                    <div class="text-[10px] uppercase font-bold tracking-widest text-slate-400 px-4 mt-8 mb-2">Manajemen Keuangan</div>
+                    <a href="{{ route('admin.transaksi.index') }}" class="sidebar-link {{ request()->routeIs('admin.transaksi.*') ? 'active' : '' }}">
+                        <i data-lucide="arrow-down-left" class="w-5 h-5 text-emerald-500"></i> Transaksi (In)
+                    </a>
+                    @if(Auth::user()->isSuperAdmin())
                     <a href="{{ route('admin.biaya.index') }}" class="sidebar-link {{ request()->routeIs('admin.biaya.*') ? 'active' : '' }}">
-                        <i data-lucide="receipt" class="w-5 h-5"></i> Catatan Biaya
+                        <i data-lucide="arrow-up-right" class="w-5 h-5 text-red-500"></i> Catatan Biaya (Out)
                     </a>
                     <a href="{{ route('admin.laporan.index') }}" class="sidebar-link {{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
-                        <i data-lucide="bar-chart-3" class="w-5 h-5"></i> Laporan
+                        <i data-lucide="bar-chart-3" class="w-5 h-5 text-blue-500"></i> Laporan Keuangan
                     </a>
                     @endif
 
@@ -103,13 +132,10 @@
                         <i data-lucide="calendar-clock" class="w-5 h-5"></i> Reservasi
                         <span class="ml-auto bg-emerald-100 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-full">Live</span>
                     </a>
-                    <a href="{{ route('admin.transaksi.index') }}" class="sidebar-link {{ request()->routeIs('admin.transaksi.*') ? 'active' : '' }}">
-                        <i data-lucide="credit-card" class="w-5 h-5"></i> Transaksi
-                    </a>
                 </nav>
 
                 <!-- Admin Profile Area -->
-                <div class="shrink-0 p-4 border-t border-slate-100 bg-slate-50/50">
+                <div class="absolute bottom-0 left-0 w-full shrink-0 p-4 border-t border-slate-100 bg-slate-50/50">
                     <div class="white-card p-4 rounded-xl flex items-center gap-3 relative group hover:shadow-md transition-shadow">
                         <div class="w-10 h-10 rounded-lg bg-slate-900 flex items-center justify-center text-white font-black">
                             {{ substr(Auth::user()->name ?? 'A', 0, 1) }}
@@ -142,7 +168,7 @@
                 </div>
 
                 <!-- Page Content (Scrollable) -->
-                <div class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative z-10">
+                <div class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative">
                     {{ $slot }}
                 </div>
             </main>

@@ -7,17 +7,18 @@
                 <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 mb-1">Manajemen Transaksi</h1>
                 <p class="text-sm text-slate-500 font-medium">Pantau arus kas pemesanan, tagihan, dan pengembalian dana tamu.</p>
             </div>
-            <div class="flex gap-2">
-                <a href="{{ route('admin.transaksi.index') }}" class="{{ $statusFilter == 'semua' ? 'bg-slate-800 text-white' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200' }} px-4 py-2 rounded-xl text-sm font-bold shadow-sm transition-colors">
-                    Semua
-                </a>
-                <a href="{{ route('admin.transaksi.index', ['status' => 'menunggu']) }}" class="{{ $statusFilter == 'menunggu' ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200' }} px-4 py-2 rounded-xl text-sm font-bold shadow-sm transition-colors">
-                    Menunggu
-                </a>
-                <a href="{{ route('admin.transaksi.index', ['status' => 'aktif']) }}" class="{{ $statusFilter == 'aktif' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200' }} px-4 py-2 rounded-xl text-sm font-bold shadow-sm transition-colors">
-                    Aktif
-                </a>
-            </div>
+            <form action="{{ route('admin.transaksi.index') }}" method="GET" class="flex gap-2">
+                <select name="month" onchange="this.form.submit()" class="form-select bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl px-4 py-2.5 shadow-sm min-w-[120px]">
+                    @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $idx => $m)
+                        <option value="{{ $idx + 1 }}" {{ $month == ($idx + 1) ? 'selected' : '' }}>{{ $m }}</option>
+                    @endforeach
+                </select>
+                <select name="year" onchange="this.form.submit()" class="form-select bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl px-4 py-2.5 shadow-sm min-w-[110px]">
+                    @for($i = date('Y'); $i >= date('Y') - 3; $i--)
+                        <option value="{{ $i }}" {{ $year == $i ? 'selected' : '' }}>Tahun {{ $i }}</option>
+                    @endfor
+                </select>
+            </form>
         </div>
 
         @if(session('success'))
@@ -47,7 +48,7 @@
                             <th scope="col" class="px-6 py-4 font-bold">Unit Villa</th>
                             <th scope="col" class="px-6 py-4 font-bold">Jadwal Menginap</th>
                             <th scope="col" class="px-6 py-4 font-bold">Status Tagihan</th>
-                            <th scope="col" class="px-6 py-4 font-bold text-right">Aksi Manual</th>
+                            <th scope="col" class="px-6 py-4 font-bold">Nominal</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -71,8 +72,6 @@
                                 <div class="text-xs text-slate-500 mt-1">{{ $trx->total_hari }} Malam</div>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="font-bold text-slate-900 mb-1.5">{{ $trx->formatted_biaya }}</div>
-                                
                                 @if($trx->status_pemesanan == 'aktif')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-700 uppercase tracking-widest">
                                         <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Lunas & Aktif
@@ -81,62 +80,19 @@
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700 uppercase tracking-widest">
                                         <div class="w-1.5 h-1.5 rounded-full bg-amber-500"></div> Menunggu Bayar
                                     </span>
-                                @elseif($trx->status_pemesanan == 'batal')
-                                    @if($trx->pembayaran && $trx->pembayaran->status_bayar == 'refund')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-blue-100 text-blue-700 uppercase tracking-widest">
-                                            <i data-lucide="refresh-ccw" class="w-3 h-3"></i> Dikembalikan
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-red-100 text-red-700 uppercase tracking-widest">
-                                            <div class="w-1.5 h-1.5 rounded-full bg-red-500"></div> Batal
-                                        </span>
-                                    @endif
-                                @else
+                                @elseif($trx->status_pemesanan == 'selesai')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 uppercase tracking-widest">
                                         <i data-lucide="check" class="w-3 h-3"></i> Selesai
                                     </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-red-100 text-red-700 uppercase tracking-widest">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-red-500"></div> Batal
+                                    </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 text-right flex justify-end gap-2">
-                                @if($trx->status_pemesanan == 'menunggu')
-                                <form action="{{ route('admin.transaksi.action', $trx->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Setujui pembayaran dan aktifkan reservasi?');">
-                                    @csrf
-                                    <input type="hidden" name="action" value="approve">
-                                    <button type="submit" class="px-3 py-1.5 text-[10px] font-bold bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg transition-all shadow-sm shadow-emerald-500/20">
-                                        Setujui
-                                    </button>
-                                </form>
-                                @endif
-
-                                @if($trx->status_pemesanan == 'aktif' && $trx->villa && $trx->villa->status_villa !== 'terisi')
-                                <form action="{{ route('admin.transaksi.action', $trx->id) }}" method="POST" class="inline-block">
-                                    @csrf
-                                    <input type="hidden" name="action" value="checkin">
-                                    <button type="submit" class="px-3 py-1.5 text-[10px] font-bold bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-all shadow-sm shadow-blue-500/20">
-                                        Check-In
-                                    </button>
-                                </form>
-                                @endif
-
-                                @if($trx->status_pemesanan == 'aktif' && $trx->villa && $trx->villa->status_villa === 'terisi')
-                                <form action="{{ route('admin.transaksi.action', $trx->id) }}" method="POST" class="inline-block">
-                                    @csrf
-                                    <input type="hidden" name="action" value="checkout">
-                                    <button type="submit" class="px-3 py-1.5 text-[10px] font-bold bg-slate-800 text-white hover:bg-slate-900 rounded-lg transition-all shadow-sm">
-                                        Check-Out
-                                    </button>
-                                </form>
-                                @endif
-
-                                @if(in_array($trx->status_pemesanan, ['menunggu', 'aktif']))
-                                <form action="{{ route('admin.transaksi.action', $trx->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Yakin ingin membatalkan reservasi ini?');">
-                                    @csrf
-                                    <input type="hidden" name="action" value="cancel">
-                                    <button type="submit" class="px-3 py-1.5 text-[10px] font-bold bg-white border border-red-200 text-red-500 hover:bg-red-50 rounded-lg transition-all">
-                                        Batal
-                                    </button>
-                                </form>
-                                @endif
+                            <td class="px-6 py-4">
+                                <div class="font-bold text-slate-900">{{ $trx->formatted_biaya }}</div>
+                                <div class="text-xs text-slate-400 mt-0.5">{{ $trx->total_hari }} malam</div>
                             </td>
                         </tr>
                         @empty

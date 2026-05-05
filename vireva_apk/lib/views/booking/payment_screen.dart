@@ -56,7 +56,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       appBar: AppBar(
         title: Text(
           'Pembayaran Villa',
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.spaceGrotesk(
             fontWeight: FontWeight.bold,
             color: AppColors.primary,
           ),

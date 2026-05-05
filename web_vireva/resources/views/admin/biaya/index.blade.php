@@ -7,9 +7,23 @@
                 <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">Catatan <span class="text-emerald-600">Biaya Operasional</span></h1>
                 <p class="text-slate-500 text-sm mt-1 font-medium">Manajemen pengeluaran untuk perhitungan laba rugi villa.</p>
             </div>
-            <a href="{{ route('admin.biaya.create') }}" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg">
-                <i data-lucide="plus" class="w-4 h-4"></i> Tambah Pengeluaran
-            </a>
+            <div class="flex flex-col sm:flex-row gap-3 items-center">
+                <form action="{{ route('admin.biaya.index') }}" method="GET" class="flex gap-2">
+                    <select name="month" onchange="this.form.submit()" class="form-select bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl px-4 py-2.5 shadow-sm min-w-[120px]">
+                        @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $idx => $m)
+                            <option value="{{ $idx + 1 }}" {{ $month == ($idx + 1) ? 'selected' : '' }}>{{ $m }}</option>
+                        @endforeach
+                    </select>
+                    <select name="year" onchange="this.form.submit()" class="form-select bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-xl px-4 py-2.5 shadow-sm min-w-[110px]">
+                        @for($i = date('Y'); $i >= date('Y') - 3; $i--)
+                            <option value="{{ $i }}" {{ $year == $i ? 'selected' : '' }}>Tahun {{ $i }}</option>
+                        @endfor
+                    </select>
+                </form>
+                <a href="{{ route('admin.biaya.create') }}" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Tambah Pengeluaran
+                </a>
+            </div>
         </div>
 
         <!-- Expense Table Card -->

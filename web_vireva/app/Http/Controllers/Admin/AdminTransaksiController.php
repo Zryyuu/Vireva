@@ -13,7 +13,13 @@ class AdminTransaksiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Pemesanan::with(['tamu', 'villa', 'pembayaran'])->orderBy('created_at', 'desc');
+        $year = $request->get('year', date('Y'));
+        $month = $request->get('month', date('m'));
+        
+        $query = Pemesanan::with(['tamu', 'villa', 'pembayaran'])
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->orderBy('created_at', 'desc');
 
         // Optional filter based on status
         if ($request->has('status') && $request->status != 'semua') {
@@ -23,19 +29,20 @@ class AdminTransaksiController extends Controller
         $transaksi = $query->paginate(15);
         $statusFilter = $request->status ?? 'semua';
 
-        return view('admin.transaksi.index', compact('transaksi', 'statusFilter'));
+        return view('admin.transaksi.index', compact('transaksi', 'statusFilter', 'year', 'month'));
     }
 
     public function processAction(Request $request, $id)
     {
         $pemesanan = Pemesanan::findOrFail($id);
 
-        // Approve Payment (Manual)
+        // Approve Payment (Manual) — tandai lunas & aktifkan booking
         if ($request->action == 'approve') {
             $pemesanan->update([
-                'status_pembayaran' => 'settlement'
+                'status_pembayaran' => 'settlement',
+                'status_pemesanan'  => 'aktif',
             ]);
-            return redirect()->back()->with('success', 'Pembayaran berhasil dikonfirmasi secara manual.');
+            return redirect()->back()->with('success', 'Pembayaran berhasil dikonfirmasi. Reservasi sekarang AKTIF.');
         }
 
         // Process Check-in

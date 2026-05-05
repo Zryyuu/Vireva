@@ -1,0 +1,78 @@
+================================================================
+  CATATAN KODE - WEB VIREVA
+================================================================
+
+--- MODELS (app/Models/) --- data dari database ---
+
+User.php       → akun login (email, password, role)
+Tamu.php       → profil tamu (nama, telepon, KTP)
+Villa.php      → unit villa (nama, harga, status tersedia/terisi)
+Pemesanan.php  → data booking (villa mana, tanggal, total biaya, status)
+Pembayaran.php → riwayat transaksi bayar
+Petugas.php    → data staf/admin
+Biaya.php      → komponen biaya tambahan (pajak, layanan)
+
+
+--- CONTROLLERS (app/Http/Controllers/) --- logika aplikasi ---
+
+BookingController.php         → semua proses booking tamu (buat, lihat, bayar, batal)
+LandingController.php         → halaman depan (landing page)
+ProfileController.php         → edit profil user
+
+Admin/AdminVillaController.php      → kelola data villa (CRUD)
+Admin/AdminReservasiController.php  → pantau jadwal tamu menginap
+Admin/AdminTransaksiController.php  → laporan keuangan & status bayar
+Admin/AdminPetugasController.php    → kelola staf (khusus superadmin)
+Admin/AdminLaporanController.php    → laporan pendapatan (khusus superadmin)
+Admin/BiayaController.php           → kelola biaya tambahan (khusus superadmin)
+
+
+--- VIEWS (resources/views/) --- tampilan halaman ---
+
+landing.blade.php              → halaman depan (homepage publik)
+dashboard.blade.php            → dashboard tamu setelah login
+
+layouts/vireva.blade.php       → template halaman publik (ada navbar+footer)
+layouts/app.blade.php          → template halaman tamu login
+layouts/admin.blade.php        → template panel admin (ada sidebar)
+layouts/guest.blade.php        → template halaman login/register
+
+bookings/index.blade.php       → daftar reservasi milik tamu
+bookings/create.blade.php      → form buat reservasi baru
+bookings/show.blade.php        → detail reservasi + tombol bayar + cetak struk
+
+admin/dashboard.blade.php      → dashboard admin
+admin/villa/                   → halaman kelola villa
+admin/reservasi/index.blade.php → jadwal tamu (check-in/out)
+admin/transaksi/index.blade.php → laporan keuangan
+
+
+--- ROUTES (routes/web.php) --- daftar URL ---
+
+/                              → landing page
+/dashboard                     → dashboard tamu
+/bookings                      → daftar reservasi saya
+/bookings/create/{villa}       → form booking villa tertentu
+/bookings/{id}                 → detail reservasi
+/bookings/{id}/snap-token      → minta token bayar ke Midtrans
+/admin/dashboard               → dashboard admin
+/admin/villa                   → kelola villa
+/admin/reservasi               → jadwal tamu
+/admin/transaksi               → laporan keuangan
+
+
+--- STATUS PEMESANAN ---
+
+menunggu  → sudah booking, belum bayar
+aktif     → sudah bayar (lunas)
+selesai   → sudah check-out
+batal     → dibatalkan
+
+
+--- ROLE USER ---
+
+tamu       → bisa booking dan bayar saja
+admin      → kelola villa, reservasi, transaksi
+superadmin → akses penuh + kelola staf + laporan
+
+================================================================

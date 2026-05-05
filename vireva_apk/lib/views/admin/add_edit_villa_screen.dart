@@ -1,21 +1,20 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 import '../../core/app_constants.dart';
 import '../../models/villa_model.dart';
 import '../../providers/villa_provider.dart';
 
-class AddEditVillaScreen extends StatefulWidget {
+class AddEditVillaScreen extends ConsumerStatefulWidget {
   final VillaModel? villa;
   const AddEditVillaScreen({super.key, this.villa});
 
   @override
-  State<AddEditVillaScreen> createState() => _AddEditVillaScreenState();
+  ConsumerState<AddEditVillaScreen> createState() => _AddEditVillaScreenState();
 }
 
-class _AddEditVillaScreenState extends State<AddEditVillaScreen> {
+class _AddEditVillaScreenState extends ConsumerState<AddEditVillaScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _namaController;
   late TextEditingController _hargaController;
@@ -34,7 +33,7 @@ class _AddEditVillaScreenState extends State<AddEditVillaScreen> {
     super.initState();
     _namaController = TextEditingController(text: widget.villa?.nama);
     _hargaController = TextEditingController(text: widget.villa?.harga.toStringAsFixed(0));
-    _kapasitasController = TextEditingController(text: '2'); // Default
+    _kapasitasController = TextEditingController(text: '2');
     _bedroomController = TextEditingController(text: widget.villa?.bedroom.toString() ?? '1');
     _bathroomController = TextEditingController(text: widget.villa?.bathroom.toString() ?? '1');
     _luasController = TextEditingController(text: widget.villa?.luas.toString() ?? '');
@@ -72,49 +71,31 @@ class _AddEditVillaScreenState extends State<AddEditVillaScreen> {
 
     bool success;
     if (widget.villa != null) {
-      success = await context.read<VillaProvider>().updateVilla(widget.villa!.id, data, _imageFile?.path);
+      success = await ref.read(villaProvider.notifier).updateVilla(widget.villa!.id, data, _imageFile?.path);
     } else {
-      success = await context.read<VillaProvider>().addVilla(data, _imageFile?.path);
+      success = await ref.read(villaProvider.notifier).addVilla(data, _imageFile?.path);
     }
 
     setState(() => _isSubmitting = false);
 
-    if (success) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Villa berhasil disimpan')),
-        );
-        Navigator.pop(context);
-      }
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.read<VillaProvider>().error ?? 'Gagal menyimpan villa')),
-        );
-      }
+    if (success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Villa berhasil disimpan'), backgroundColor: AppColors.success),
+      );
+      Navigator.pop(context);
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(ref.read(villaProvider).error ?? 'Gagal menyimpan villa'), backgroundColor: AppColors.error),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.close_rounded, color: AppColors.primary),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          widget.villa == null ? 'Tambah Villa Baru' : 'Edit Villa',
-          style: GoogleFonts.plusJakartaSans(
-            color: AppColors.primary,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
+        title: Text(widget.villa == null ? 'Tambah Villa Baru' : 'Edit Villa'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.p24),
@@ -123,40 +104,31 @@ class _AddEditVillaScreenState extends State<AddEditVillaScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildImagePicker(),
-              const SizedBox(height: 24),
-              _buildTextField('Nama Villa', _namaController, 'Contoh: Villa Sapphire'),
-              const SizedBox(height: 16),
-              _buildDropdown('Tipe Villa'),
-              const SizedBox(height: 16),
-              _buildTextField('Harga Per Malam (Rp)', _hargaController, '0', keyboardType: TextInputType.number),
-              const SizedBox(height: 16),
+              _buildImagePicker(theme),
+              const SizedBox(height: AppSpacing.p32),
+              _buildTextField('NAMA VILLA', _namaController, 'Contoh: Villa Sapphire', theme),
+              const SizedBox(height: AppSpacing.p20),
+              _buildDropdown('TIPE VILLA', theme),
+              const SizedBox(height: AppSpacing.p20),
+              _buildTextField('HARGA PER MALAM (RP)', _hargaController, '0', theme, keyboardType: TextInputType.number),
+              const SizedBox(height: AppSpacing.p20),
               Row(
                 children: [
-                  Expanded(child: _buildTextField('Bedroom', _bedroomController, '1', keyboardType: TextInputType.number)),
-                  const SizedBox(width: 16),
-                  Expanded(child: _buildTextField('Bathroom', _bathroomController, '1', keyboardType: TextInputType.number)),
+                  Expanded(child: _buildTextField('BEDROOM', _bedroomController, '1', theme, keyboardType: TextInputType.number)),
+                  const SizedBox(width: AppSpacing.p16),
+                  Expanded(child: _buildTextField('BATHROOM', _bathroomController, '1', theme, keyboardType: TextInputType.number)),
                 ],
               ),
-              const SizedBox(height: 16),
-              _buildTextField('Deskripsi', _deskripsiController, 'Ceritakan tentang villa ini...', maxLines: 4),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.p20),
+              _buildTextField('DESKRIPSI', _deskripsiController, 'Ceritakan tentang villa ini...', theme, maxLines: 4),
+              const SizedBox(height: AppSpacing.p48),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 0,
-                  ),
                   child: _isSubmitting 
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : Text(
-                        'Simpan Villa',
-                        style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
+                    : const Text('SIMPAN VILLA'),
                 ),
               ),
             ],
@@ -166,51 +138,38 @@ class _AddEditVillaScreenState extends State<AddEditVillaScreen> {
     );
   }
 
-  Widget _buildImagePicker() {
+  Widget _buildImagePicker(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Foto Villa',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
-          ),
-        ),
-        const SizedBox(height: 8),
+        Text('FOTO VILLA', style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 1)),
+        const SizedBox(height: 12),
         GestureDetector(
           onTap: _pickImage,
           child: Container(
             width: double.infinity,
-            height: 180,
+            height: 200,
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppSpacing.radius),
               border: Border.all(color: AppColors.border),
             ),
             child: _imageFile != null
                 ? ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(AppSpacing.radius),
                     child: Image.file(_imageFile!, fit: BoxFit.cover),
                   )
                 : (widget.villa?.imageUrl != null
                     ? ClipRRect(
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(AppSpacing.radius),
                         child: Image.network(widget.villa!.imageUrl!, fit: BoxFit.cover),
                       )
-                    : Column(
+                    : const Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.add_photo_alternate_outlined, size: 40, color: AppColors.accent),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Klik untuk pilih foto',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
+                          Icon(Icons.add_photo_alternate_outlined, size: 48, color: AppColors.primary),
+                          SizedBox(height: 12),
+                          Text('Klik untuk pilih foto villa'),
                         ],
                       )),
           ),
@@ -219,42 +178,18 @@ class _AddEditVillaScreenState extends State<AddEditVillaScreen> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, String placeholder, {TextInputType keyboardType = TextInputType.text, int maxLines = 1}) {
+  Widget _buildTextField(String label, TextEditingController controller, String placeholder, ThemeData theme, {TextInputType keyboardType = TextInputType.text, int maxLines = 1}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
-          ),
-        ),
+        Text(label, style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 1)),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
           maxLines: maxLines,
-          style: GoogleFonts.plusJakartaSans(fontSize: 14),
           decoration: InputDecoration(
             hintText: placeholder,
-            hintStyle: GoogleFonts.plusJakartaSans(color: Colors.grey[400]),
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: AppColors.border),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: AppColors.border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: AppColors.accent),
-            ),
           ),
           validator: (value) => value == null || value.isEmpty ? 'Wajib diisi' : null,
         ),
@@ -262,37 +197,33 @@ class _AddEditVillaScreenState extends State<AddEditVillaScreen> {
     );
   }
 
-  Widget _buildDropdown(String label) {
+  Widget _buildDropdown(String label, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
-          ),
-        ),
+        Text(label, style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 1)),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
             border: Border.all(color: AppColors.border),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: _tipeVilla,
               isExpanded: true,
-              style: GoogleFonts.plusJakartaSans(fontSize: 14, color: AppColors.primary),
+              icon: const Icon(Icons.keyboard_arrow_down_rounded),
               items: [
                 'Villa 1 Kamar Tidur',
                 'Villa 2 Kamar Tidur',
                 'Villa 3 Kamar Tidur',
                 'Villa Keluarga (Family)',
-                'Villa Presidential'
+                'Villa Presidential',
+                '1-Bedroom Villa',
+                '2-Bedroom Villa',
+                '3-Bedroom Villa',
               ].map((String val) {
                 return DropdownMenuItem<String>(
                   value: val,

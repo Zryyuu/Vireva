@@ -9,8 +9,14 @@
             </div>
             <div class="flex gap-2">
                 <form action="{{ route('admin.laporan.index') }}" method="GET" class="flex gap-2">
-                    <select name="year" onchange="this.form.submit()" class="bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-xl px-4 py-2 shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
-                        @for($i = date('Y'); $i >= 2023; $i--)
+                    <select name="month" onchange="this.form.submit()" class="form-select bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-xl px-4 py-2.5 shadow-sm min-w-[140px]">
+                        <option value="">Semua Bulan</option>
+                        @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $idx => $m)
+                            <option value="{{ $idx + 1 }}" {{ $month == ($idx + 1) ? 'selected' : '' }}>{{ $m }}</option>
+                        @endforeach
+                    </select>
+                    <select name="year" onchange="this.form.submit()" class="form-select bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-xl px-4 py-2.5 shadow-sm min-w-[120px]">
+                        @for($i = date('Y'); $i >= date('Y') - 3; $i--)
                             <option value="{{ $i }}" {{ $year == $i ? 'selected' : '' }}>Tahun {{ $i }}</option>
                         @endfor
                     </select>
@@ -47,13 +53,13 @@
             </div>
 
             <div class="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
-                <div class="absolute -right-4 -top-4 w-24 h-24 bg-purple-50 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-red-50 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
                 <div class="relative z-10">
-                    <div class="w-12 h-12 bg-purple-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-purple-600/20">
-                        <i data-lucide="home" class="w-6 h-6"></i>
+                    <div class="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-red-600/20">
+                        <i data-lucide="trending-down" class="w-6 h-6"></i>
                     </div>
-                    <div class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Unit Villa Aktif</div>
-                    <div class="text-3xl font-black text-slate-900 tracking-tight">{{ $totalVilla }} <span class="text-sm font-bold text-slate-400 ml-1 uppercase">Unit</span></div>
+                    <div class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Total Pengeluaran</div>
+                    <div class="text-3xl font-black text-slate-900 tracking-tight">Rp {{ number_format($totalBiaya, 0, ',', '.') }}</div>
                 </div>
             </div>
         </div>

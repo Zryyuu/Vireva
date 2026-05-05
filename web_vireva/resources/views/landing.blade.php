@@ -1,4 +1,4 @@
-@extends('layouts.bohot')
+@extends('layouts.vireva')
 
 @section('title', 'Beranda')
 

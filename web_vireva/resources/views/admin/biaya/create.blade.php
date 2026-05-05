@@ -21,7 +21,7 @@
                     <!-- Item Name -->
                     <div class="md:col-span-2">
                         <label class="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Item Pengeluaran</label>
-                        <input type="text" name="item_biaya" required placeholder="Contoh: Tagihan Listrik April" 
+                        <input type="text" name="item_biaya" required placeholder="Contoh: Tagihan Listrik" 
                             class="w-full px-5 py-4 bg-slate-50 border-transparent rounded-2xl focus:bg-white focus:border-emerald-500 focus:ring-0 transition-all font-bold text-slate-900">
                     </div>
 

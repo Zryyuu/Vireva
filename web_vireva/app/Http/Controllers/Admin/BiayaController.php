@@ -8,10 +8,17 @@ use Illuminate\Http\Request;
 
 class BiayaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $biayas = Biaya::orderBy('tanggal', 'desc')->paginate(15);
-        return view('admin.biaya.index', compact('biayas'));
+        $year = $request->get('year', date('Y'));
+        $month = $request->get('month', date('m'));
+
+        $biayas = Biaya::whereYear('tanggal', $year)
+            ->whereMonth('tanggal', $month)
+            ->orderBy('tanggal', 'desc')
+            ->paginate(15);
+            
+        return view('admin.biaya.index', compact('biayas', 'year', 'month'));
     }
 
     public function create()

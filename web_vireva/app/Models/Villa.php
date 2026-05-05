@@ -25,12 +25,13 @@ class Villa extends Model
     protected $casts = [
         'harga_permalam' => 'decimal:2',
         'fasilitas' => 'array',
+        'foto' => 'array',
         'jumlah_bedroom' => 'integer',
         'jumlah_bathroom' => 'integer',
         'luas_bangunan' => 'integer',
     ];
 
-    protected $appends = ['nama', 'tipe', 'harga', 'formatted_harga', 'image_url', 'detail'];
+    protected $appends = ['nama', 'tipe', 'harga', 'formatted_harga', 'image_url', 'all_images', 'detail'];
 
     public function getNamaAttribute() { return $this->nama_villa; }
     public function getTipeAttribute() { return $this->tipe_villa; }
@@ -38,7 +39,20 @@ class Villa extends Model
 
     public function getImageUrlAttribute()
     {
-        return $this->foto ? url('storage/' . $this->foto) : null;
+        if (is_array($this->foto) && count($this->foto) > 0) {
+            return url('storage/' . $this->foto[0]);
+        }
+        return $this->foto && !is_array($this->foto) ? url('storage/' . $this->foto) : null;
+    }
+
+    public function getAllImagesAttribute()
+    {
+        if (is_array($this->foto)) {
+            return array_map(function($path) {
+                return url('storage/' . $path);
+            }, $this->foto);
+        }
+        return $this->foto ? [url('storage/' . $this->foto)] : [];
     }
 
     public function getDetailAttribute()
@@ -48,6 +62,7 @@ class Villa extends Model
             'bathroom' => $this->jumlah_bathroom,
             'luas' => $this->luas_bangunan,
             'deskripsi' => $this->deskripsi,
+            'images' => $this->all_images,
         ];
     }
 
@@ -63,6 +78,6 @@ class Villa extends Model
 
     public function getFormattedHargaAttribute()
     {
-        return 'Rp ' . number_format($this->harga_permalam, 0, ',', '.');
+        return 'Rp ' . number_format((float) $this->harga_permalam, 0, ',', '.');
     }
 }

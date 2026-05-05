@@ -23,25 +23,10 @@
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
+                    <div class="md:col-span-2">
                         <x-input-label for="nama_petugas" value="Nama Lengkap Staf" class="text-slate-700 font-bold" />
                         <x-text-input id="nama_petugas" class="block mt-2 w-full border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl" type="text" name="nama_petugas" :value="old('nama_petugas', $user->petugas ? $user->petugas->nama_petugas : $user->name)" required autofocus />
                         <x-input-error :messages="$errors->get('nama_petugas')" class="mt-2" />
-                    </div>
-
-                    <div>
-                        <x-input-label for="jabatan" value="Jabatan / Peran" class="text-slate-700 font-bold" />
-                        <select id="jabatan" name="jabatan" class="border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl shadow-sm block mt-2 w-full">
-                            @php $curr_jabatan = old('jabatan', $user->petugas ? $user->petugas->jabatan : ''); @endphp
-                            <option value="Front Desk Concierge" {{ $curr_jabatan == 'Front Desk Concierge' ? 'selected' : '' }}>Resepsionis / Front Desk</option>
-                            <option value="Villa Manager" {{ $curr_jabatan == 'Villa Manager' ? 'selected' : '' }}>Manajer Villa</option>
-                            <option value="Marketing Staff" {{ $curr_jabatan == 'Marketing Staff' ? 'selected' : '' }}>Staf Pemasaran</option>
-                            <option value="Finance & Admin" {{ $curr_jabatan == 'Finance & Admin' ? 'selected' : '' }}>Keuangan & Admin</option>
-                            @if(!in_array($curr_jabatan, ['Front Desk Concierge', 'Villa Manager', 'Marketing Staff', 'Finance & Admin']) && $curr_jabatan != '')
-                                <option value="{{ $curr_jabatan }}" selected>{{ $curr_jabatan }}</option>
-                            @endif
-                        </select>
-                        <x-input-error :messages="$errors->get('jabatan')" class="mt-2" />
                     </div>
                 </div>
 

@@ -1,27 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/app_constants.dart';
 import '../../providers/villa_provider.dart';
 import '../../models/villa_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'add_edit_villa_screen.dart';
 
-class ManageVillaScreen extends StatefulWidget {
+class ManageVillaScreen extends ConsumerStatefulWidget {
   const ManageVillaScreen({super.key});
 
   @override
-  State<ManageVillaScreen> createState() => _ManageVillaScreenState();
+  ConsumerState<ManageVillaScreen> createState() => _ManageVillaScreenState();
 }
 
-class _ManageVillaScreenState extends State<ManageVillaScreen> {
+class _ManageVillaScreenState extends ConsumerState<ManageVillaScreen> {
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
-      if (mounted) {
-        context.read<VillaProvider>().fetchVillas();
-      }
+      ref.read(villaProvider.notifier).fetchVillas();
     });
   }
 
@@ -29,24 +26,28 @@ class _ManageVillaScreenState extends State<ManageVillaScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Hapus Villa', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.radius)),
+        title: const Text('Hapus Villa'),
         content: Text('Apakah Anda yakin ingin menghapus ${villa.nama}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Batal', style: GoogleFonts.plusJakartaSans(color: Colors.grey)),
+            child: const Text('BATAL', style: TextStyle(color: AppColors.textSecondary)),
           ),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              final success = await context.read<VillaProvider>().deleteVilla(villa.id);
-              if (!mounted) return;
+              final success = await ref.read(villaProvider.notifier).deleteVilla(villa.id);
+              if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(success ? 'Villa berhasil dihapus' : 'Gagal menghapus villa')),
+                SnackBar(
+                  content: Text(success ? 'Villa berhasil dihapus' : 'Gagal menghapus villa'),
+                  backgroundColor: success ? AppColors.success : AppColors.error,
+                  behavior: SnackBarBehavior.floating,
+                ),
               );
             },
-            child: Text('Hapus', style: GoogleFonts.plusJakartaSans(color: Colors.red, fontWeight: FontWeight.bold)),
+            child: const Text('HAPUS', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -55,38 +56,24 @@ class _ManageVillaScreenState extends State<ManageVillaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final villaProvider = context.watch<VillaProvider>();
+    final villaState = ref.watch(villaProvider);
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Kelola Villa',
-          style: GoogleFonts.plusJakartaSans(
-            color: AppColors.primary,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
+        title: const Text('Kelola Villa'),
       ),
-      body: villaProvider.isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.accent))
+      body: villaState.isLoading && villaState.villas.isEmpty
+          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
           : RefreshIndicator(
-              onRefresh: () => villaProvider.fetchVillas(),
-              color: AppColors.accent,
+              onRefresh: () => ref.read(villaProvider.notifier).fetchVillas(),
+              color: AppColors.primary,
               child: ListView.builder(
                 padding: const EdgeInsets.all(AppSpacing.p24),
-                itemCount: villaProvider.villas.length,
+                itemCount: villaState.villas.length,
                 itemBuilder: (context, index) {
-                  final villa = villaProvider.villas[index];
-                  return _buildVillaTile(villa);
+                  final villa = villaState.villas[index];
+                  return _buildVillaTile(villa, theme);
                 },
               ),
             ),
@@ -99,88 +86,94 @@ class _ManageVillaScreenState extends State<ManageVillaScreen> {
         },
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add_rounded, color: Colors.white),
-        label: Text(
-          'Tambah Villa',
-          style: GoogleFonts.plusJakartaSans(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        label: const Text('TAMBAH VILLA', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );
   }
 
-  Widget _buildVillaTile(VillaModel villa) {
+  Widget _buildVillaTile(VillaModel villa, ThemeData theme) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: AppSpacing.p16),
+      padding: const EdgeInsets.all(AppSpacing.p12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(AppSpacing.radius),
         border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
             child: CachedNetworkImage(
               imageUrl: villa.imageUrl ?? '',
-              width: 80,
-              height: 80,
+              width: 90,
+              height: 90,
               fit: BoxFit.cover,
               errorWidget: (context, url, error) => Container(
-                width: 80,
-                height: 80,
-                color: Colors.grey[100],
-                child: const Icon(Icons.image_not_supported_rounded, color: Colors.grey),
+                width: 90,
+                height: 90,
+                color: AppColors.surface,
+                child: const Icon(Icons.villa_rounded, color: AppColors.textSecondary),
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.p16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   villa.nama,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
+                  style: theme.textTheme.titleMedium,
                 ),
                 Text(
                   villa.tipe,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
+                  style: theme.textTheme.bodySmall,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 Text(
                   villa.formattedHarga,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.accent,
+                    color: AppColors.primary,
                   ),
                 ),
               ],
             ),
           ),
-          Column(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => AddEditVillaScreen(villa: villa)),
-                  );
-                },
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert_rounded, color: AppColors.textMuted),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusSm)),
+            onSelected: (value) {
+              if (value == 'edit') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddEditVillaScreen(villa: villa)),
+                );
+              } else if (value == 'delete') {
+                _confirmDelete(villa);
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'edit',
+                child: Row(
+                  children: [
+                    Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+                    SizedBox(width: 12),
+                    Text('Edit Villa'),
+                  ],
+                ),
               ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
-                onPressed: () => _confirmDelete(villa),
+              const PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.error),
+                    SizedBox(width: 12),
+                    Text('Hapus Villa', style: TextStyle(color: AppColors.error)),
+                  ],
+                ),
               ),
             ],
           ),

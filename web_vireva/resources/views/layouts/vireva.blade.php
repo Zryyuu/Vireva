@@ -93,7 +93,7 @@
                             </form>
                         @else
                             <a href="{{ route('login') }}" class="text-sm font-bold uppercase tracking-widest hover:text-primary transition-colors border-r border-dark/10 pr-4 mr-2">Masuk</a>
-                            <a href="{{ route('register') }}" class="bg-primary text-white px-6 py-2.5 text-sm font-bold uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20">Gabung Member</a>
+                            <a href="{{ route('register') }}" class="bg-primary text-white px-6 py-2.5 text-sm font-bold uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20">Daftar</a>
                         @endauth
                     </div>
 
@@ -155,7 +155,7 @@
                     </form>
                 @else
                     <a href="{{ route('login') }}" class="block w-full text-center border-2 border-dark py-4 font-bold uppercase tracking-widest hover:bg-dark hover:text-white transition-all">Masuk</a>
-                    <a href="{{ route('register') }}" class="block w-full text-center bg-primary text-white py-4 font-bold uppercase tracking-widest hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all">Gabung Member</a>
+                    <a href="{{ route('register') }}" class="block w-full text-center bg-primary text-white py-4 font-bold uppercase tracking-widest hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all">Daftar</a>
                 @endauth
             </div>
         </div>

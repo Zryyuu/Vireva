@@ -37,7 +37,6 @@
                     <thead class="text-xs text-slate-500 bg-slate-50 uppercase tracking-widest border-b border-slate-200">
                         <tr>
                             <th scope="col" class="px-6 py-4 font-bold">Identitas Staf</th>
-                            <th scope="col" class="px-6 py-4 font-bold">Jabatan</th>
                             <th scope="col" class="px-6 py-4 font-bold">Hak Akses</th>
                             <th scope="col" class="px-6 py-4 font-bold text-right">Aksi</th>
                         </tr>
@@ -56,11 +55,7 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4">
-                                <div class="font-medium text-slate-700">
-                                    {{ $user->petugas ? $user->petugas->jabatan : 'Administrator Sistem' }}
-                                </div>
-                            </td>
+
                             <td class="px-6 py-4">
                                 @if($user->isSuperAdmin())
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200 shadow-sm">
@@ -74,25 +69,29 @@
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
-                                    <a href="{{ route('admin.petugas.edit', $user->id) }}" class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Edit Staf">
-                                        <i data-lucide="edit-3" class="w-4 h-4"></i>
-                                    </a>
-                                    
-                                    @if(!$user->isSuperAdmin() && auth()->id() !== $user->id)
-                                    <form action="{{ route('admin.petugas.destroy', $user->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus petugas ini? Hak akses mereka ke Dasbor akan dicabut secara permanen.');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus Staf">
-                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                        </button>
-                                    </form>
+                                    @if(!$user->isSuperAdmin())
+                                        <a href="{{ route('admin.petugas.edit', $user->id) }}" class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Edit Staf">
+                                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                        </a>
+                                        
+                                        @if(auth()->id() !== $user->id)
+                                        <form action="{{ route('admin.petugas.destroy', $user->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus petugas ini? Hak akses mereka ke Dasbor akan dicabut secara permanen.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus Staf">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                            </button>
+                                        </form>
+                                        @endif
+                                    @else
+                                        <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest mr-2">Sistem Terkunci</span>
                                     @endif
                                 </div>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" class="px-6 py-12 text-center">
+                            <td colspan="3" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center justify-center text-slate-400">
                                     <div class="w-16 h-16 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mb-4">
                                         <i data-lucide="users" class="w-8 h-8 text-slate-300"></i>

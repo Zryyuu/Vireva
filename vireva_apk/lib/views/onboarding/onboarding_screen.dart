@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/app_constants.dart';
 import '../auth/login_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -17,6 +17,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Scaffold(
       body: Stack(
         children: [
@@ -27,73 +29,76 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             },
             children: [
               _buildPage(
-                color: Colors.white,
-                title: 'Temukan Villa Impian Anda',
+                theme: theme,
+                title: 'Temukan Villa\nImpian Anda',
                 subtitle: 'Pilih koleksi villa mewah terbaik dengan fasilitas kelas dunia.',
-                image: Icons.house_rounded,
+                icon: Icons.house_rounded,
               ),
               _buildPage(
-                color: Colors.white,
-                title: 'Booking Mudah & Cepat',
+                theme: theme,
+                title: 'Booking Mudah\n& Cepat',
                 subtitle: 'Proses reservasi instan tanpa ribet dalam satu genggaman.',
-                image: Icons.calendar_today_rounded,
+                icon: Icons.calendar_today_rounded,
               ),
               _buildPage(
-                color: Colors.white,
-                title: 'Pelayanan Eksklusif',
+                theme: theme,
+                title: 'Pelayanan\nEksklusif',
                 subtitle: 'Nikmati kenyamanan maksimal dengan layanan manajemen villa profesional.',
-                image: Icons.verified_user_rounded,
+                icon: Icons.verified_user_rounded,
               ),
             ],
           ),
           
-          // Navigation
-          Container(
-            alignment: const Alignment(0, 0.85),
+          Positioned(
+            bottom: AppSpacing.p48,
+            left: AppSpacing.p24,
+            right: AppSpacing.p24,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Skip
-                TextButton(
-                  onPressed: () => _controller.jumpToPage(2),
-                  child: const Text('Lewati', style: TextStyle(color: Color(0xFF64748B))),
-                ),
-                
-                // Indicator
                 SmoothPageIndicator(
                   controller: _controller,
                   count: 3,
                   effect: const ExpandingDotsEffect(
-                    activeDotColor: Color(0xFF10B981),
-                    dotColor: Color(0xFFE2E8F0),
+                    activeDotColor: AppColors.primary,
+                    dotColor: AppColors.border,
                     dotHeight: 8,
                     dotWidth: 8,
+                    spacing: 8,
                   ),
                 ),
                 
-                // Next or Get Started
-                isLastPage 
-                ? TextButton(
-                    onPressed: () async {
+                GestureDetector(
+                  onTap: () async {
+                    if (isLastPage) {
                       final prefs = await SharedPreferences.getInstance();
                       await prefs.setBool('showHome', true);
-                      
                       if (context.mounted) {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(builder: (context) => const LoginScreen()),
                         );
                       }
-                    },
-                    child: const Text('Mulai', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF10B981))),
-                  )
-                : TextButton(
-                    onPressed: () => _controller.nextPage(
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.easeInOut,
+                    } else {
+                      _controller.nextPage(
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.easeInOut,
+                      );
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.p16),
+                    decoration: const BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
                     ),
-                    child: const Text('Lanjut', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                    child: Icon(
+                      isLastPage ? Icons.check : Icons.arrow_forward_ios_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
+                ),
               ],
             ),
           )
@@ -103,43 +108,39 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildPage({
-    required Color color,
+    required ThemeData theme,
     required String title,
     required String subtitle,
-    required IconData image,
+    required IconData icon,
   }) {
     return Container(
-      color: color,
-      padding: const EdgeInsets.all(40),
+      padding: const EdgeInsets.all(AppSpacing.p32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(30),
+            height: 280,
+            width: double.infinity,
             decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(30),
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+              border: Border.all(color: AppColors.border, width: 1),
             ),
-            child: Icon(image, size: 100, color: const Color(0xFF0F172A)),
+            child: Icon(icon, size: 120, color: AppColors.primary),
           ),
-          const SizedBox(height: 64),
+          const SizedBox(height: AppSpacing.p48),
           Text(
             title,
             textAlign: TextAlign.center,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF0F172A),
-            ),
+            style: theme.textTheme.displayLarge,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.p24),
           Text(
             subtitle,
             textAlign: TextAlign.center,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 16,
-              color: const Color(0xFF64748B),
-              height: 1.5,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: AppColors.textSecondary,
+              height: 1.6,
             ),
           ),
         ],

@@ -19,7 +19,12 @@ class Pemesanan extends Model
         'status_pemesanan',
         'snap_token',
         'status_pembayaran',
+        'bukti_pembayaran',
+        'catatan_admin',
+        'metode_pembayaran',
     ];
+
+    protected $appends = ['bukti_url'];
 
     protected $casts = [
         'tanggal_checkin' => 'date',
@@ -50,5 +55,10 @@ class Pemesanan extends Model
     public function getFormattedBiayaAttribute()
     {
         return 'Rp ' . number_format($this->total_biaya, 0, ',', '.');
+    }
+
+    public function getBuktiUrlAttribute()
+    {
+        return $this->bukti_pembayaran ? url('storage/' . $this->bukti_pembayaran) : null;
     }
 }

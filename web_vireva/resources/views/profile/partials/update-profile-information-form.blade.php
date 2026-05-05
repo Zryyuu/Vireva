@@ -47,6 +47,24 @@
             @endif
         </div>
 
+        <div>
+            <x-input-label for="no_hape" value="Nomor WhatsApp / HP" />
+            <x-text-input id="no_hape" name="no_hape" type="text" class="mt-1 block w-full" :value="old('no_hape', $user->tamu?->no_hape)" placeholder="Contoh: 08123456789" />
+            <x-input-error class="mt-2" :messages="$errors->get('no_hape')" />
+        </div>
+
+        <div>
+            <x-input-label for="no_identitas" value="Nomor Identitas (KTP/Paspor)" />
+            <x-text-input id="no_identitas" name="no_identitas" type="text" class="mt-1 block w-full" :value="old('no_identitas', $user->tamu?->no_identitas)" placeholder="Masukkan 16 digit NIK KTP Anda" />
+            <x-input-error class="mt-2" :messages="$errors->get('no_identitas')" />
+        </div>
+
+        <div>
+            <x-input-label for="alamat" value="Alamat Lengkap Sesuai KTP" />
+            <textarea id="alamat" name="alamat" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" rows="3" placeholder="Jl. Raya No. 123, Kelurahan, Kecamatan, Kota...">{{ old('alamat', $user->tamu?->alamat) }}</textarea>
+            <x-input-error class="mt-2" :messages="$errors->get('alamat')" />
+        </div>
+
         <div class="flex items-center gap-4">
             <x-primary-button>Simpan Perubahan</x-primary-button>
 

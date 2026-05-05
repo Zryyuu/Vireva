@@ -26,13 +26,27 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $user->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
+
+        // Update or Create Tamu Record if user role is 'user'
+        if ($user->role === 'user') {
+            $user->tamu()->updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'nama_tamu' => $user->name,
+                    'no_hape' => $request->no_hape,
+                    'no_identitas' => $request->no_identitas,
+                    'alamat' => $request->alamat,
+                ]
+            );
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
