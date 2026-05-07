@@ -35,6 +35,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/bookings/{pemesanan}', [BookingController::class, 'show'])->name('bookings.show');
     Route::post('/bookings/{pemesanan}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::post('/bookings/{pemesanan}/upload-proof', [BookingController::class, 'uploadProof'])->name('bookings.upload-proof');
+    
+    // Public/User access to check villa availability
+    Route::get('/reservasi/booked-dates/{villaId}', [\App\Http\Controllers\Admin\AdminReservasiController::class, 'getBookedDates'])->name('reservasi.booked-dates');
 });
 
 // Admin Routes

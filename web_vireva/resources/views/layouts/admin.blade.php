@@ -186,5 +186,6 @@
                 lucide.createIcons();
             });
         </script>
+        @stack('scripts')
     </body>
 </html>

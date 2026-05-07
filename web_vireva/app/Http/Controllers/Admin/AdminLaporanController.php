@@ -20,11 +20,16 @@ class AdminLaporanController extends Controller
         $queryOmzet = Pemesanan::whereIn('status_pembayaran', ['settlement', 'paid'])
             ->whereYear('created_at', $year);
             
-        $queryBooking = Pemesanan::whereYear('created_at', $year);
+        $queryBooking = Pemesanan::whereIn('status_pembayaran', ['settlement', 'paid'])
+            ->whereYear('created_at', $year);
+        
+        $trxQuery = Pemesanan::with(['tamu', 'villa'])
+            ->whereYear('created_at', $year);
 
         if ($month) {
             $queryOmzet->whereMonth('created_at', $month);
             $queryBooking->whereMonth('created_at', $month);
+            $trxQuery->whereMonth('created_at', $month);
         }
 
         $totalOmzet = $queryOmzet->sum('total_biaya');
@@ -40,19 +45,33 @@ class AdminLaporanController extends Controller
         // 3. Pendapatan Bulanan (Untuk Grafik - Selalu 12 bulan)
         $monthlyRevenue = Pemesanan::whereIn('status_pembayaran', ['settlement', 'paid'])
             ->whereYear('created_at', $year)
-            ->select(
-                DB::raw('MONTH(created_at) as month_num'),
-                DB::raw('SUM(total_biaya) as total')
-            )
-            ->groupBy('month_num')
             ->get()
-            ->pluck('total', 'month_num')
-            ->all();
+            ->groupBy(function($date) {
+                return Carbon::parse($date->created_at)->format('n'); // ambil angka bulan (1-12)
+            })
+            ->map(function($month) {
+                return $month->sum('total_biaya');
+            });
 
         // Fill missing months with 0
         $chartData = [];
         for ($i = 1; $i <= 12; $i++) {
-            $chartData[] = $monthlyRevenue[$i] ?? 0;
+            $chartData[] = $monthlyRevenue->get($i, 0);
+        }
+
+        // 3b. Pengeluaran Bulanan (Untuk Grafik - negatif supaya ke bawah)
+        $monthlyExpense = \App\Models\Biaya::whereYear('tanggal', $year)
+            ->get()
+            ->groupBy(function($item) {
+                return Carbon::parse($item->tanggal)->format('n');
+            })
+            ->map(function($month) {
+                return $month->sum('jumlah');
+            });
+
+        $expenseChartData = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $expenseChartData[] = $monthlyExpense->get($i, 0); // positif, 0 di bawah
         }
 
         // 4. Villa Terpopuler (Top 5)
@@ -68,13 +87,6 @@ class AdminLaporanController extends Controller
             ->get();
 
         // 5. Transaksi Terbaru (Filtered by Month)
-        $trxQuery = Pemesanan::with(['tamu', 'villa'])
-            ->whereYear('created_at', $year);
-        
-        if ($month) {
-            $trxQuery->whereMonth('created_at', $month);
-        }
-
         $recentTransactions = $trxQuery->orderBy('created_at', 'desc')
             ->take(20)
             ->get();
@@ -83,7 +95,8 @@ class AdminLaporanController extends Controller
             'totalOmzet', 
             'totalBooking', 
             'totalBiaya', 
-            'chartData', 
+            'chartData',
+            'expenseChartData',
             'popularVillas',
             'recentTransactions',
             'year',

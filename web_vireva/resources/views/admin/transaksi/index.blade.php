@@ -73,13 +73,19 @@
                             </td>
                             <td class="px-6 py-4">
                                 @if($trx->status_pemesanan == 'aktif')
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-700 uppercase tracking-widest">
-                                        <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Lunas & Aktif
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-blue-100 text-blue-700 uppercase tracking-widest">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div> Sedang Menginap
                                     </span>
                                 @elseif($trx->status_pemesanan == 'menunggu')
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700 uppercase tracking-widest">
-                                        <div class="w-1.5 h-1.5 rounded-full bg-amber-500"></div> Menunggu Bayar
-                                    </span>
+                                    @if($trx->status_pembayaran == 'settlement')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-700 uppercase tracking-widest">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Lunas / Terkonfirmasi
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700 uppercase tracking-widest">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-amber-500"></div> Menunggu Bayar
+                                        </span>
+                                    @endif
                                 @elseif($trx->status_pemesanan == 'selesai')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 uppercase tracking-widest">
                                         <i data-lucide="check" class="w-3 h-3"></i> Selesai

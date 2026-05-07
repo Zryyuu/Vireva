@@ -140,6 +140,15 @@
                                 </td>
                                 <td class="px-8 py-4 text-right">
                                     <div class="text-sm font-black text-slate-900">Rp {{ number_format($trx->total_biaya, 0, ',', '.') }}</div>
+                                    <div class="mt-1">
+                                        @if($trx->status_pembayaran == 'settlement')
+                                            <span class="text-[9px] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">Lunas</span>
+                                        @elseif($trx->status_pembayaran == 'cancel')
+                                            <span class="text-[9px] font-bold text-red-600 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded-md border border-red-100">Batal</span>
+                                        @else
+                                            <span class="text-[9px] font-bold text-amber-600 uppercase tracking-widest bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100">Pending</span>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -152,53 +161,81 @@
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const ctx = document.getElementById('revenueChart').getContext('2d');
-        
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
-        gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+        document.addEventListener('DOMContentLoaded', function () {
+            const canvas = document.getElementById('revenueChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
-                datasets: [{
-                    label: 'Pendapatan',
-                    data: {!! json_encode($chartData) !!},
-                    borderColor: '#10b981',
-                    backgroundColor: gradient,
-                    fill: true,
-                    tension: 0.4,
-                    borderWidth: 4,
-                    pointRadius: 6,
-                    pointBackgroundColor: '#10b981',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
+            const formatRp = (val) => {
+                const abs = Math.abs(val);
+                if (abs >= 1000000) return 'Rp ' + (abs/1000000).toLocaleString('id-ID', {minimumFractionDigits:0, maximumFractionDigits:3}) + ' jt';
+                return 'Rp ' + abs.toLocaleString('id-ID');
+            };
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+                    datasets: [
+                        {
+                            label: 'Pendapatan',
+                            data: {!! json_encode($chartData) !!},
+                            backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                            borderColor: '#059669',
+                            borderWidth: 1.5,
+                            borderRadius: 6,
+                            borderSkipped: false,
+                        },
+                        {
+                            label: 'Pengeluaran',
+                            data: {!! json_encode($expenseChartData) !!},
+                            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                            borderColor: '#dc2626',
+                            borderWidth: 1.5,
+                            borderRadius: 6,
+                            borderSkipped: false,
+                        }
+                    ]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
-                        ticks: {
-                            callback: function(value) {
-                                return 'Rp ' + (value/1000000) + 'jt';
-                            },
-                            font: { size: 11, weight: 'bold' }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + formatRp(context.parsed.y);
+                                }
+                            }
                         }
                     },
-                    x: {
-                        grid: { display: false },
-                        ticks: { font: { size: 11, weight: 'bold' } }
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grace: '15%',
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: {
+                                callback: function(value) {
+                                    if (value === 0) return 'Rp 0';
+                                    if (value >= 1000000) return 'Rp ' + (value/1000000).toLocaleString('id-ID') + 'jt';
+                                    if (value >= 1000) return 'Rp ' + (value/1000).toLocaleString('id-ID') + 'rb';
+                                    return 'Rp ' + value.toLocaleString('id-ID');
+                                },
+                                font: { size: 11, weight: 'bold' }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 11, weight: 'bold' } }
+                        }
                     }
                 }
-            }
+            });
         });
     </script>
     @endpush

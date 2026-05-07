@@ -36,13 +36,12 @@ class AdminTransaksiController extends Controller
     {
         $pemesanan = Pemesanan::findOrFail($id);
 
-        // Approve Payment (Manual) — tandai lunas & aktifkan booking
+        // Approve Payment (Manual) — tandai lunas
         if ($request->action == 'approve') {
             $pemesanan->update([
                 'status_pembayaran' => 'settlement',
-                'status_pemesanan'  => 'aktif',
             ]);
-            return redirect()->back()->with('success', 'Pembayaran berhasil dikonfirmasi. Reservasi sekarang AKTIF.');
+            return redirect()->back()->with('success', 'Pembayaran berhasil dikonfirmasi sebagai LUNAS.');
         }
 
         // Process Check-in
@@ -67,7 +66,10 @@ class AdminTransaksiController extends Controller
 
         // Cancel Transaction
         if ($request->action == 'cancel') {
-            $pemesanan->update(['status_pemesanan' => 'batal']);
+            $pemesanan->update([
+                'status_pemesanan' => 'batal',
+                'status_pembayaran' => 'cancel'
+            ]);
             $pemesanan->villa->update(['status_villa' => 'tersedia']);
             
             return redirect()->back()->with('success', 'Reservasi berhasil dibatalkan.');

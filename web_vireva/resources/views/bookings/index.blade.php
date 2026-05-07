@@ -45,12 +45,18 @@
                                 </div>
                                 <div class="text-right">
                                     @if($booking->status_pemesanan == 'menunggu')
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold bg-amber-100 text-amber-700 uppercase tracking-widest shadow-sm">
-                                            <div class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div> Menunggu
-                                        </span>
+                                        @if($booking->status_pembayaran == 'settlement')
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold bg-emerald-100 text-emerald-700 uppercase tracking-widest shadow-sm">
+                                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> Terkonfirmasi
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold bg-amber-100 text-amber-700 uppercase tracking-widest shadow-sm">
+                                                <div class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div> Menunggu
+                                            </span>
+                                        @endif
                                     @elseif($booking->status_pemesanan == 'aktif')
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold bg-emerald-100 text-emerald-700 uppercase tracking-widest shadow-sm">
-                                            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> Aktif
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold bg-blue-100 text-blue-700 uppercase tracking-widest shadow-sm">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div> Sedang Menginap
                                         </span>
                                     @elseif($booking->status_pemesanan == 'batal')
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold bg-red-100 text-red-700 uppercase tracking-widest shadow-sm">

@@ -1,4 +1,56 @@
 <x-admin-layout>
+    <!-- Flatpickr CSS & Clean White Theme -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        .flatpickr-calendar {
+            background: #ffffff !important;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1) !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 1.5rem !important;
+            width: 350px !important;
+            padding: 10px !important;
+        }
+        .flatpickr-days, .dayContainer {
+            width: 330px !important;
+            min-width: 330px !important;
+            max-width: 330px !important;
+        }
+        .flatpickr-day {
+            max-width: 45px !important;
+            height: 45px !important;
+            line-height: 45px !important;
+        }
+        .flatpickr-months .flatpickr-month {
+            background: transparent !important;
+            color: #0f172a !important;
+            fill: #0f172a !important;
+        }
+        .flatpickr-current-month .flatpickr-monthDropdown-months {
+            font-weight: 800 !important;
+            font-size: 14px !important;
+        }
+        .flatpickr-weekday {
+            color: #94a3b8 !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+        }
+        .flatpickr-day {
+            border-radius: 10px !important;
+            color: #1e293b !important;
+            font-weight: 500 !important;
+            margin: 2px !important;
+        }
+        .flatpickr-day.selected {
+            background: #10b981 !important;
+            border-color: #10b981 !important;
+        }
+        .flatpickr-day.flatpickr-disabled {
+            color: #e2e8f0 !important;
+        }
+        .flatpickr-calendar.arrowTop:before, .flatpickr-calendar.arrowTop:after {
+            display: none !important;
+        }
+    </style>
     <div class="space-y-6 sm:space-y-8 animate__animated animate__fadeIn">
         
         <!-- Header -->
@@ -39,7 +91,7 @@
         </div>
 
         @if(session('success'))
-            <div class="bg-emerald-50 p-4 rounded-2xl border-l-4 border-emerald-500 flex items-center gap-3 shadow-sm">
+            <div id="alert-success" class="bg-emerald-50 p-4 rounded-2xl border-l-4 border-emerald-500 flex items-center gap-3 shadow-sm transition-all duration-500">
                 <div class="p-2 bg-white rounded-full text-emerald-600 shadow-sm border border-emerald-100">
                     <i data-lucide="check-circle" class="w-5 h-5"></i>
                 </div>
@@ -48,7 +100,7 @@
         @endif
 
         @if(session('error'))
-            <div class="bg-red-50 p-4 rounded-2xl border-l-4 border-red-500 flex items-center gap-3 shadow-sm">
+            <div id="alert-error" class="bg-red-50 p-4 rounded-2xl border-l-4 border-red-500 flex items-center gap-3 shadow-sm transition-all duration-500">
                 <div class="p-2 bg-white rounded-full text-red-600 shadow-sm border border-red-100">
                     <i data-lucide="alert-circle" class="w-5 h-5"></i>
                 </div>
@@ -100,12 +152,7 @@
                                     @if($res->status_pembayaran == 'settlement')
                                         <span class="px-2 py-1 bg-emerald-50 text-emerald-600 text-[9px] font-bold uppercase rounded-full border border-emerald-200">LUNAS</span>
                                     @elseif($res->status_pembayaran == 'pending')
-                                        <div class="flex flex-col items-center gap-1">
-                                            <span class="px-2 py-1 bg-orange-50 text-orange-600 text-[9px] font-bold uppercase rounded-full border border-orange-200">PENDING</span>
-                                            @if($res->bukti_pembayaran)
-                                                <button onclick="showBukti('{{ asset('storage/' . $res->bukti_pembayaran) }}', {{ $res->id }})" class="text-[9px] font-bold text-blue-600 hover:underline">LIHAT BUKTI</button>
-                                            @endif
-                                        </div>
+                                        <span class="px-2 py-1 bg-orange-50 text-orange-600 text-[9px] font-bold uppercase rounded-full border border-orange-200">PENDING</span>
                                     @else
                                         <span class="px-2 py-1 bg-red-50 text-red-600 text-[9px] font-bold uppercase rounded-full border border-red-200">{{ $res->status_pembayaran }}</span>
                                     @endif
@@ -122,12 +169,38 @@
                                     @endif
                                 </td>
                                 <td class="px-8 py-5 text-right">
-                                    <div class="flex items-center justify-end gap-2">
+                                    <div class="flex items-center justify-end gap-1">
+                                        {{-- Tombol Inspect / Detail --}}
+                                        <button 
+                                            onclick="showDetail(this)"
+                                            data-id="{{ $res->id }}"
+                                            data-nama="{{ $res->tamu->nama_tamu }}"
+                                            data-villa="{{ $res->villa->nama_villa }}"
+                                            data-checkin="{{ $res->tanggal_checkin->format('d/m/Y') }}"
+                                            data-checkout="{{ $res->tanggal_checkout->format('d/m/Y') }}"
+                                            data-total="Rp {{ number_format($res->total_biaya, 0, ',', '.') }}"
+                                            data-bukti="{{ $res->bukti_pembayaran ? url('storage/' . $res->bukti_pembayaran) : '' }}"
+                                            data-status-p="{{ $res->status_pembayaran }}"
+                                            class="p-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-all btn-detail" 
+                                            title="Detail/Inspect">
+                                            <i data-lucide="eye" class="w-4 h-4"></i>
+                                        </button>
+
+                                        @if($res->status_pemesanan == 'menunggu' && $res->status_pembayaran == 'pending')
+                                            <form action="{{ url('/admin/reservasi/' . $res->id . '/verify') }}" method="POST" class="inline">
+                                                @csrf
+                                                <input type="hidden" name="status" value="settlement">
+                                                <button type="submit" class="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-all" title="Verifikasi">
+                                                    <i data-lucide="check" class="w-4 h-4"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+
                                         @if($res->status_pemesanan == 'menunggu' && $res->status_pembayaran == 'settlement')
                                             <form action="{{ route('admin.transaksi.action', $res->id) }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="action" value="checkin">
-                                                <button type="submit" class="px-3 py-1.5 bg-emerald-600 text-white text-[10px] font-bold uppercase rounded-lg hover:bg-emerald-700">Check-In</button>
+                                                <button type="submit" class="px-3 py-1.5 bg-emerald-600 text-white text-[10px] font-bold uppercase rounded-lg hover:bg-emerald-700 shadow-md shadow-emerald-500/20">Check-In</button>
                                             </form>
                                         @endif
 
@@ -140,10 +213,12 @@
                                         @endif
 
                                         @if(in_array($res->status_pemesanan, ['menunggu', 'aktif']))
-                                            <form action="{{ route('admin.transaksi.action', $res->id) }}" method="POST" onsubmit="return confirm('Batalkan?');">
+                                            <form action="{{ route('admin.transaksi.action', $res->id) }}" method="POST" onsubmit="return confirm('Tolak/Batalkan reservasi ini?')">
                                                 @csrf
                                                 <input type="hidden" name="action" value="cancel">
-                                                <button type="submit" class="p-2 text-slate-400 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                                <button type="submit" class="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all">
+                                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                                </button>
                                             </form>
                                         @endif
                                     </div>
@@ -154,6 +229,54 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detail & Inspect -->
+    <div id="modalDetail" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[99] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl rounded-[2rem] overflow-hidden shadow-2xl animate__animated animate__zoomIn animate__faster">
+            <div class="flex justify-between items-center p-6 border-b border-slate-100">
+                <h3 class="font-black text-slate-900 flex items-center gap-2">
+                    <i data-lucide="search" class="w-5 h-5 text-emerald-500"></i> Detail Reservasi
+                </h3>
+                <button onclick="document.getElementById('modalDetail').classList.add('hidden')" class="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                    <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                </button>
+            </div>
+            <div class="p-8">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Nama Tamu</label>
+                            <p id="detNama" class="text-lg font-black text-slate-900"></p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Check-In</label>
+                                <p id="detCheckin" class="text-sm font-bold text-slate-700"></p>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Check-Out</label>
+                                <p id="detCheckout" class="text-sm font-bold text-slate-700"></p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Villa & Total</label>
+                            <p id="detVilla" class="text-sm font-bold text-slate-900"></p>
+                            <p id="detTotal" class="text-lg font-black text-emerald-600"></p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="h-[350px] bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden flex items-center justify-center p-2">
+                            <img id="imgBukti" src="" class="max-w-full max-h-full object-contain rounded-lg hidden">
+                            <div id="noBukti" class="text-center p-8">
+                                <i data-lucide="image-off" class="w-8 h-8 text-slate-300 mx-auto mb-2"></i>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Belum ada bukti</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -187,11 +310,11 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase mb-1 block">Check-In</label>
-                            <input type="date" name="tanggal_checkin" required class="w-full rounded-xl border-slate-200 text-sm">
+                            <input type="text" name="tanggal_checkin" id="manual_checkin" placeholder="Pilih Tanggal" required class="w-full rounded-xl border-slate-200 text-sm bg-white">
                         </div>
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase mb-1 block">Check-Out</label>
-                            <input type="date" name="tanggal_checkout" required class="w-full rounded-xl border-slate-200 text-sm">
+                            <input type="text" name="tanggal_checkout" id="manual_checkout" placeholder="Pilih Tanggal" required class="w-full rounded-xl border-slate-200 text-sm bg-white">
                         </div>
                     </div>
                     <div>
@@ -204,36 +327,88 @@
         </div>
     </div>
 
-    <!-- Modal Bukti Bayar -->
-    <div id="modalBukti" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden animate__animated animate__zoomIn">
-            <div class="p-8">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-slate-900">Verifikasi Pembayaran</h2>
-                    <button onclick="document.getElementById('modalBukti').classList.add('hidden')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x"></i></button>
-                </div>
-                <img id="imgBukti" src="" class="w-full rounded-2xl mb-6 shadow-sm border border-slate-100">
-                <form id="formVerify" action="" method="POST" class="space-y-4">
-                    @csrf
-                    <input type="hidden" name="status" id="inputStatus" value="settlement">
-                    <div>
-                        <label class="text-xs font-bold text-slate-500 uppercase mb-1 block">Catatan Admin</label>
-                        <textarea name="catatan" class="w-full rounded-xl border-slate-200 text-sm" placeholder="Contoh: Bukti valid, dana masuk..."></textarea>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <button type="submit" onclick="document.getElementById('inputStatus').value='settlement'" class="py-3 bg-emerald-600 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/20 hover:bg-emerald-700">Terima</button>
-                        <button type="submit" onclick="document.getElementById('inputStatus').value='cancel'" class="py-3 bg-red-600 text-white rounded-xl font-bold shadow-lg shadow-red-500/20 hover:bg-red-700">Tolak</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        function showBukti(url, id) {
-            document.getElementById('imgBukti').src = url;
-            document.getElementById('formVerify').action = "/admin/reservasi/" + id + "/verify";
-            document.getElementById('modalBukti').classList.remove('hidden');
+        function showDetail(btn) {
+            const data = btn.dataset;
+            document.getElementById('detNama').innerText = data.nama;
+            document.getElementById('detCheckin').innerText = data.checkin;
+            document.getElementById('detCheckout').innerText = data.checkout;
+            document.getElementById('detVilla').innerText = data.villa;
+            document.getElementById('detTotal').innerText = data.total;
+            
+            const img = document.getElementById('imgBukti');
+            const noBukti = document.getElementById('noBukti');
+
+            if (data.bukti && data.bukti !== '') {
+                img.src = data.bukti;
+                img.classList.remove('hidden');
+                noBukti.classList.add('hidden');
+            } else {
+                img.classList.add('hidden');
+                noBukti.classList.remove('hidden');
+            }
+
+
+            document.getElementById('modalDetail').classList.remove('hidden');
+            if (window.lucide) lucide.createIcons();
         }
+
+        const villaSelect = document.querySelector('select[name="villa_id"]');
+        
+        // Initialize Flatpickr
+        const checkinPicker = flatpickr("#manual_checkin", {
+            minDate: "today",
+            dateFormat: "Y-m-d",
+            disable: [],
+            onChange: function(selectedDates, dateStr) {
+                if (selectedDates.length > 0) {
+                    const nextDay = new Date(selectedDates[0]);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    checkoutPicker.set("minDate", nextDay);
+                }
+            }
+        });
+
+        const checkoutPicker = flatpickr("#manual_checkout", {
+            minDate: new Date().getTime() + 24 * 60 * 60 * 1000, // Minimal Besok
+            dateFormat: "Y-m-d",
+            disable: []
+        });
+
+        async function fetchBookedDates() {
+            const villaId = villaSelect.value;
+            if (!villaId) return;
+
+            try {
+                const response = await fetch(`/reservasi/booked-dates/${villaId}`);
+                const data = await response.json();
+                
+                const disabled = data.map(range => ({
+                    from: range.start,
+                    to: range.end
+                }));
+
+                checkinPicker.set("disable", disabled);
+                checkoutPicker.set("disable", disabled);
+            } catch (e) {
+                console.error("Gagal ambil data:", e);
+            }
+        }
+
+        villaSelect.addEventListener('change', fetchBookedDates);
+        fetchBookedDates();
+
+        // Auto-hide alerts after 3 seconds
+        setTimeout(() => {
+            ['alert-success', 'alert-error'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(-20px)';
+                    setTimeout(() => el.remove(), 500);
+                }
+            });
+        }, 3000);
     </script>
 </x-admin-layout>

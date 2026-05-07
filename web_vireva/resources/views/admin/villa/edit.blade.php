@@ -140,6 +140,8 @@
                 </div>
 
                 <script>
+                    let newFilesDataTransfer = new DataTransfer();
+
                     function removeExistingImage(id) {
                         if (confirm('Hapus foto ini dari galeri? (Perubahan akan disimpan setelah Anda mengklik Update)')) {
                             const element = document.getElementById(id);
@@ -150,31 +152,67 @@
                     }
 
                     function previewNewImages(input) {
+                        if (input.files && input.files.length > 0) {
+                            // Append new files to our DataTransfer object
+                            Array.from(input.files).forEach(file => {
+                                newFilesDataTransfer.items.add(file);
+                            });
+                            
+                            // Update input files to match our DataTransfer object
+                            input.files = newFilesDataTransfer.files;
+                            
+                            renderNewPreviews();
+                        }
+                    }
+
+                    function renderNewPreviews() {
                         const wrapper = document.getElementById('new-preview-wrapper');
                         const grid = document.getElementById('new-preview-grid');
+                        const input = document.getElementById('foto');
+                        
                         grid.innerHTML = '';
                         
-                        if (input.files && input.files.length > 0) {
+                        if (newFilesDataTransfer.files.length > 0) {
                             wrapper.classList.remove('hidden');
                             
-                            Array.from(input.files).forEach(file => {
+                            Array.from(newFilesDataTransfer.files).forEach((file, index) => {
                                 const reader = new FileReader();
                                 reader.onload = function(e) {
                                     const div = document.createElement('div');
                                     div.className = 'relative group aspect-video overflow-hidden rounded-2xl border border-slate-200 shadow-sm';
                                     div.innerHTML = `
                                         <img src="${e.target.result}" class="w-full h-full object-cover transition-transform group-hover:scale-110" />
-                                        <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
-                                            BARU
+                                        <button type="button" onclick="removeNewImage(${index})" class="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg z-10">
+                                            <i data-lucide="x" class="w-4 h-4"></i>
+                                        </button>
+                                        <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold pointer-events-none uppercase tracking-widest">
+                                            Baru
                                         </div>
                                     `;
                                     grid.appendChild(div);
+                                    if (window.lucide) window.lucide.createIcons();
                                 }
                                 reader.readAsDataURL(file);
                             });
                         } else {
                             wrapper.classList.add('hidden');
+                            input.value = ''; // Reset input
                         }
+                    }
+
+                    function removeNewImage(index) {
+                        const newDataTransfer = new DataTransfer();
+                        const files = newFilesDataTransfer.files;
+                        
+                        for (let i = 0; i < files.length; i++) {
+                            if (i !== index) {
+                                newDataTransfer.items.add(files[i]);
+                            }
+                        }
+                        
+                        newFilesDataTransfer = newDataTransfer;
+                        document.getElementById('foto').files = newFilesDataTransfer.files;
+                        renderNewPreviews();
                     }
                 </script>
 

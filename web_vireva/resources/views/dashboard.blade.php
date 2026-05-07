@@ -86,11 +86,15 @@
                                     
                                     <div>
                                         @if($booking->status_pemesanan === 'aktif')
-                                            <span class="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-wider rounded-full border border-blue-200">Aktif / Check In</span>
+                                            <span class="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-wider rounded-full border border-blue-200">Sedang Menginap</span>
                                         @elseif($booking->status_pemesanan === 'menunggu')
-                                            <span class="px-3 py-1 bg-orange-50 text-orange-600 text-[10px] font-bold uppercase tracking-wider rounded-full border border-orange-200">Menunggu Pembayaran</span>
+                                            @if($booking->status_pembayaran === 'settlement')
+                                                <span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-wider rounded-full border border-emerald-200">Terkonfirmasi</span>
+                                            @else
+                                                <span class="px-3 py-1 bg-orange-50 text-orange-600 text-[10px] font-bold uppercase tracking-wider rounded-full border border-orange-200">Menunggu Pembayaran</span>
+                                            @endif
                                         @elseif($booking->status_pemesanan === 'selesai')
-                                            <span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-wider rounded-full border border-emerald-200">Selesai</span>
+                                            <span class="px-3 py-1 bg-slate-50 text-slate-600 text-[10px] font-bold uppercase tracking-wider rounded-full border border-slate-200">Selesai</span>
                                         @else
                                             <span class="px-3 py-1 bg-red-50 text-red-600 text-[10px] font-bold uppercase tracking-wider rounded-full border border-red-200">Dibatalkan</span>
                                         @endif

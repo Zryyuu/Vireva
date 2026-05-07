@@ -31,19 +31,24 @@
             // Execute real queries for the dashboard metrics
             $totalVillas = \App\Models\Villa::count();
             
-            // 1. Reservasi Terjadwal (Status Menunggu - yang sudah booking tapi belum masuk)
-            $scheduledReservations = \App\Models\Pemesanan::where('status_pemesanan', 'menunggu')->count();
-
-            // 2. Check-in Hari Ini (Status Menunggu & Tanggal Check-in Hari Ini)
-            $todayCheckins = \App\Models\Pemesanan::whereDate('tanggal_checkin', today())
-                                ->where('status_pemesanan', 'menunggu')
-                                ->count();
-
-            // 3. Tamu Menginap / Aktif (Status Aktif)
+            // 1. Sedang Menginap (Tamu yang sudah check-in dan ada di dalam unit)
             $currentlyStaying = \App\Models\Pemesanan::where('status_pemesanan', 'aktif')->count();
+
+            // 2. Check-in Terjadwal (Mendatang - Tamu yang akan datang di hari-hari berikutnya bulan ini)
+            $upcomingCheckins = \App\Models\Pemesanan::where('status_pemesanan', 'menunggu')
+                                ->where('tanggal_checkin', '>=', today())
+                                ->whereMonth('tanggal_checkin', now()->month)
+                                ->whereYear('tanggal_checkin', now()->year)
+                                ->count();
+            
+            // 3. Performa Reservasi (Bulan Ini) - Total semua yang sukses/masuk data
+            $monthlyTotal = \App\Models\Pemesanan::whereIn('status_pemesanan', ['menunggu', 'aktif', 'selesai'])
+                                ->whereMonth('created_at', now()->month)
+                                ->whereYear('created_at', now()->year)
+                                ->count();
             
             // Financial Metrics (Super Admin Only) - Filtered by Current Month
-            $grossRevenue = \App\Models\Pemesanan::where('status_pemesanan', 'selesai')
+            $grossRevenue = \App\Models\Pemesanan::whereIn('status_pembayaran', ['settlement', 'paid'])
                                 ->whereMonth('created_at', now()->month)
                                 ->whereYear('created_at', now()->year)
                                 ->sum('total_biaya');
@@ -59,22 +64,38 @@
                                 ->take(6)
                                 ->get();
 
-            // Chart Data: Last 14 Days
-            $chartLabels = [];
+            // Chart Data: Monthly Revenue for Current Year
+            $monthlyRevenue = \App\Models\Pemesanan::whereIn('status_pembayaran', ['settlement', 'paid'])
+                ->whereYear('created_at', now()->year)
+                ->get()
+                ->groupBy(function($date) {
+                    return \Carbon\Carbon::parse($date->created_at)->format('n');
+                })
+                ->map(function($month) {
+                    return $month->sum('total_biaya');
+                });
+
+            // Chart Data: Monthly Expenses for Current Year
+            $monthlyExpenses = \App\Models\Biaya::whereYear('tanggal', now()->year)
+                ->get()
+                ->groupBy(function($item) {
+                    return \Carbon\Carbon::parse($item->tanggal)->format('n');
+                })
+                ->map(function($month) {
+                    return $month->sum('jumlah');
+                });
+
+            $chartLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
             $revenueData = [];
             $expenseData = [];
-
-            for ($i = 13; $i >= 0; $i--) {
-                $date = now()->subDays($i)->format('Y-m-d');
-                $chartLabels[] = now()->subDays($i)->format('d M');
-                
-                $revenueData[] = \App\Models\Pemesanan::whereDate('created_at', $date)
-                                    ->where('status_pemesanan', 'selesai')
-                                    ->sum('total_biaya');
-                                    
-                $expenseData[] = \App\Models\Biaya::whereDate('tanggal', $date)
-                                    ->sum('jumlah');
+            for ($i = 1; $i <= 12; $i++) {
+                $revenueData[] = $monthlyRevenue->get($i, 0);
+                $expenseData[] = $monthlyExpenses->get($i, 0); // positif, 0 di bawah
             }
+
+            // Calculate current occupancy rate
+            // In the context of "Monitoring this month", we look at active stays
+            $occupancyRate = $totalVillas > 0 ? ($currentlyStaying / $totalVillas) * 100 : 0;
         @endphp
 
         <!-- Dashboard Metrics Grid -->
@@ -114,27 +135,27 @@
             <!-- Common Operational Row (3 Cards) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <x-vireva.metric-card 
-                    title="Daftar Villa" 
-                    :value="$totalVillas" 
-                    icon="home" 
-                    color="slate" 
-                    subtitle="Unit terdaftar" 
-                />
-
-                <x-vireva.metric-card 
-                    title="Reservasi Terjadwal" 
-                    :value="$scheduledReservations" 
-                    icon="calendar" 
-                    color="emerald" 
-                    subtitle="Menunggu check-in" 
-                />
-
-                <x-vireva.metric-card 
-                    title="Tamu Menginap" 
-                    :value="$currentlyStaying . ' Unit'" 
+                    title="Sedang Menginap" 
+                    :value="$currentlyStaying" 
                     icon="door-closed" 
                     color="blue" 
-                    subtitle="Sedang aktif menginap" 
+                    subtitle="Unit terisi saat ini" 
+                />
+
+                <x-vireva.metric-card 
+                    title="Check-in Terjadwal" 
+                    :value="$upcomingCheckins" 
+                    icon="calendar" 
+                    color="amber" 
+                    subtitle="Akan datang bulan ini" 
+                />
+
+                <x-vireva.metric-card 
+                    title="Reservasi (Bulan Ini)" 
+                    :value="$monthlyTotal" 
+                    icon="bar-chart-3" 
+                    color="emerald" 
+                    subtitle="Total performa bulanan" 
                 />
             </div>
         </div>
@@ -144,8 +165,8 @@
         <div class="bg-white border border-slate-200 p-8 rounded-[2rem] shadow-sm">
             <div class="flex items-center justify-between mb-8">
                 <div>
-                    <h3 class="font-bold text-lg text-slate-900">Tren Finansial</h3>
-                    <p class="text-xs text-slate-500 font-medium">Perbandingan harian Pendapatan vs Pengeluaran (14 Hari Terakhir).</p>
+                    <h3 class="font-bold text-lg text-slate-900">Tren Finansial ({{ now()->year }})</h3>
+                    <p class="text-xs text-slate-500 font-medium">Performa pendapatan kotor bulanan di tahun berjalan.</p>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-2">
@@ -178,46 +199,52 @@
                 </div>
                 
                 <div class="overflow-x-auto flex-1">
-                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                    <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-50 border-b border-slate-200">
-                                <th class="px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-500">Identitas Member</th>
-                                <th class="px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-500">Unit Terpilih</th>
-                                <th class="px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-500">Jadwal Check-In</th>
-                                <th class="px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-500">Status</th>
+                                <th class="px-4 py-4 text-xs font-bold uppercase tracking-widest text-slate-500">Identitas Member</th>
+                                <th class="px-4 py-4 text-xs font-bold uppercase tracking-widest text-slate-500">Unit Terpilih</th>
+                                <th class="px-4 py-4 text-xs font-bold uppercase tracking-widest text-slate-500">Jadwal Check-In</th>
+                                <th class="px-4 py-4 text-xs font-bold uppercase tracking-widest text-slate-500">Status</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             @forelse($recentBookings as $booking)
                                 <tr class="hover:bg-slate-50 transition-colors group">
-                                    <td class="px-8 py-5">
+                                    <td class="px-4 py-4">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center font-bold text-sm text-emerald-600">
+                                            <div class="w-9 h-9 rounded-full bg-emerald-50 flex items-center justify-center font-bold text-sm text-emerald-600 flex-shrink-0">
                                                 {{ substr($booking->tamu->nama_tamu ?? 'G', 0, 1) }}
                                             </div>
                                             <div>
-                                                <div class="font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">{{ $booking->tamu->nama_tamu ?? 'Tamu' }}</div>
-                                                <div class="text-xs text-slate-500 font-medium">{{ $booking->tamu->user->email ?? $booking->tamu->no_hape ?? 'Tidak Ada Kontak' }}</div>
+                                                <div class="font-bold text-slate-900 group-hover:text-emerald-600 transition-colors text-sm">{{ $booking->tamu->nama_tamu ?? 'Tamu' }}</div>
+                                                <div class="text-xs text-slate-500 font-medium truncate max-w-[140px]">{{ $booking->tamu->user->email ?? $booking->tamu->no_hape ?? 'Tidak Ada Kontak' }}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-8 py-5">
-                                        <div class="font-bold text-slate-900">{{ $booking->villa->nama_villa ?? 'Tidak Diketahui' }}</div>
+                                    <td class="px-4 py-4">
+                                        <div class="font-bold text-slate-900 text-sm">{{ $booking->villa->nama_villa ?? 'Tidak Diketahui' }}</div>
                                         <div class="text-xs text-slate-500 font-medium">{{ $booking->villa->tipe_villa ?? '-' }}</div>
                                     </td>
-                                    <td class="px-8 py-5">
-                                        <div class="text-slate-900 font-bold">{{ $booking->tanggal_checkin->format('d M Y') }}</div>
+                                    <td class="px-4 py-4">
+                                        <div class="text-slate-900 font-bold text-sm">{{ $booking->tanggal_checkin->format('d M Y') }}</div>
                                         <div class="text-xs text-slate-500 font-medium">{{ $booking->total_hari }} Malam</div>
                                     </td>
-                                    <td class="px-8 py-5">
+                                    <td class="px-4 py-4">
                                         @if($booking->status_pemesanan === 'aktif')
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-wider rounded-full border border-blue-200">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Check In
+                                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Sedang Menginap
                                             </span>
                                         @elseif($booking->status_pemesanan === 'menunggu')
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-orange-600 text-[10px] font-bold uppercase tracking-wider rounded-full border border-orange-200">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span> Terjadwal
-                                            </span>
+                                            @if($booking->status_pembayaran === 'settlement')
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-wider rounded-full border border-emerald-200">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Terkonfirmasi
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-orange-600 text-[10px] font-bold uppercase tracking-wider rounded-full border border-orange-200">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span> Menunggu
+                                                </span>
+                                            @endif
                                         @elseif($booking->status_pemesanan === 'selesai')
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-wider rounded-full border border-emerald-200">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Selesai
@@ -306,11 +333,11 @@
                         Pembaruan otomatis mengenai status villa dan layanan reservasi. Evaluasi data ini untuk menentukan harga dinamis (Dynamic Pricing) di musim liburan.
                     </p>
                     <div class="w-full h-1 bg-slate-700 rounded-full overflow-hidden relative z-10">
-                        <div class="h-full bg-emerald-500 w-2/3 rounded-full"></div>
+                        <div class="h-full bg-emerald-500 rounded-full transition-all duration-1000" style="width: {{ $occupancyRate }}%"></div>
                     </div>
                     <div class="flex justify-between mt-2 text-[10px] uppercase font-bold tracking-widest text-slate-400 relative z-10">
                         <span>Kapasitas</span>
-                        <span>65% Terisi</span>
+                        <span>{{ number_format($occupancyRate, 0) }}% Terisi</span>
                     </div>
                 </div>
             </div>
@@ -320,72 +347,95 @@
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const ctx = document.getElementById('financialChart').getContext('2d');
-        
-        // Gradient for Revenue
-        const revGradient = ctx.createLinearGradient(0, 0, 0, 400);
-        revGradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
-        revGradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
-        
-        // Gradient for Expense
-        const expGradient = ctx.createLinearGradient(0, 0, 0, 400);
-        expGradient.addColorStop(0, 'rgba(239, 68, 68, 0.1)');
-        expGradient.addColorStop(1, 'rgba(239, 68, 68, 0)');
+        document.addEventListener('DOMContentLoaded', function () {
+            const canvas = document.getElementById('financialChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: {!! json_encode($chartLabels) !!},
-                datasets: [
-                    {
-                        label: 'Pendapatan',
-                        data: {!! json_encode($revenueData) !!},
-                        borderColor: '#10b981',
-                        backgroundColor: revGradient,
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#10b981'
-                    },
-                    {
-                        label: 'Pengeluaran',
-                        data: {!! json_encode($expenseData) !!},
-                        borderColor: '#ef4444',
-                        backgroundColor: expGradient,
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#ef4444'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
+            const formatRp = (val) => {
+                const abs = Math.abs(val);
+                if (abs >= 1000000) return 'Rp ' + (abs/1000000).toLocaleString('id-ID', {minimumFractionDigits:0, maximumFractionDigits:3}) + ' jt';
+                if (abs >= 1000) return 'Rp ' + (abs/1000).toLocaleString('id-ID') + ' rb';
+                return 'Rp ' + abs.toLocaleString('id-ID');
+            };
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: {!! json_encode($chartLabels) !!},
+                    datasets: [
+                        {
+                            label: 'Pendapatan',
+                            data: {!! json_encode($revenueData) !!},
+                            backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                            borderColor: '#059669',
+                            borderWidth: 1.5,
+                            borderRadius: 6,
+                            borderSkipped: false,
+                        },
+                        {
+                            label: 'Pengeluaran',
+                            data: {!! json_encode($expenseData) !!},
+                            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                            borderColor: '#dc2626',
+                            borderWidth: 1.5,
+                            borderRadius: 6,
+                            borderSkipped: false,
+                        }
+                    ]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
-                        ticks: {
-                            callback: function(value) {
-                                if (value >= 1000000) return 'Rp ' + (value/1000000) + 'jt';
-                                return 'Rp ' + value.toLocaleString();
-                            },
-                            font: { size: 10, weight: 'bold' }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + formatRp(context.parsed.y);
+                                }
+                            }
                         }
                     },
-                    x: {
-                        grid: { display: false },
-                        ticks: { font: { size: 10, weight: 'bold' } }
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grace: '15%',
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: {
+                                callback: function(value) {
+                                    if (value === 0) return 'Rp 0';
+                                    if (value >= 1000000) return 'Rp ' + (value/1000000).toLocaleString('id-ID') + 'jt';
+                                    if (value >= 1000) return 'Rp ' + (value/1000).toLocaleString('id-ID') + 'rb';
+                                    return 'Rp ' + value.toLocaleString('id-ID');
+                                },
+                                font: { size: 10, weight: 'bold' }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 10, weight: 'bold' } }
+                        }
                     }
                 }
-            }
+            });
         });
+
+        // Auto-hide alerts after 3 seconds
+        setTimeout(() => {
+            ['alert-success', 'alert-error'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(-20px)';
+                    setTimeout(() => el.remove(), 500);
+                }
+            });
+        }, 3000);
     </script>
     @endpush
     @endif

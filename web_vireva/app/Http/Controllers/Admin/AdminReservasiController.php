@@ -16,10 +16,13 @@ class AdminReservasiController extends Controller
      */
     public function index(Request $request)
     {
-        // Auto-cleanup: Hapus pemesanan pending yang sudah lebih dari 24 jam
+        // Auto-cleanup: Tandai pemesanan pending yang sudah lebih dari 24 jam sebagai batal (jangan didelete)
         Pemesanan::where('status_pembayaran', 'pending')
             ->where('created_at', '<', now()->subDay())
-            ->delete();
+            ->update([
+                'status_pemesanan' => 'batal',
+                'status_pembayaran' => 'cancel'
+            ]);
 
         $year = $request->get('year', date('Y'));
         $month = $request->get('month', date('m'));
@@ -41,6 +44,22 @@ class AdminReservasiController extends Controller
         return view('admin.reservasi.index', compact('reservasi', 'statusFilter', 'villas', 'year', 'month'));
     }
 
+    public function getBookedDates($villaId)
+    {
+        $bookings = Pemesanan::where('villa_id', $villaId)
+            ->whereNotIn('status_pemesanan', ['batal'])
+            ->get(['tanggal_checkin', 'tanggal_checkout']);
+
+        $dates = $bookings->map(function ($booking) {
+            return [
+                'start' => Carbon::parse($booking->tanggal_checkin)->format('Y-m-d'),
+                'end' => Carbon::parse($booking->tanggal_checkout)->format('Y-m-d'),
+            ];
+        });
+
+        return response()->json($dates);
+    }
+
     public function verifyPayment(Request $request, $id)
     {
         $booking = Pemesanan::findOrFail($id);
@@ -55,7 +74,7 @@ class AdminReservasiController extends Controller
                 'status_pembayaran' => 'settlement',
                 'catatan_admin' => $request->catatan,
             ]);
-            return back()->with('success', 'Pembayaran berhasil diverifikasi.');
+            return back()->with('success', 'Pembayaran berhasil diverifikasi. Status reservasi tetap menunggu check-in.');
         } else {
             $booking->update([
                 'status_pembayaran' => 'cancel',
@@ -72,7 +91,7 @@ class AdminReservasiController extends Controller
             'nama_tamu' => 'required',
             'no_hape' => 'required',
             'villa_id' => 'required|exists:villas,id',
-            'tanggal_checkin' => 'required|date',
+            'tanggal_checkin' => 'required|date|after_or_equal:today',
             'tanggal_checkout' => 'required|date|after:tanggal_checkin',
             'bukti_pembayaran' => 'nullable|image|max:5120',
         ]);
@@ -80,16 +99,12 @@ class AdminReservasiController extends Controller
         $checkin = Carbon::parse($request->tanggal_checkin);
         $checkout = Carbon::parse($request->tanggal_checkout);
 
-        // Check availability
+        // Check availability (Standard Overlap Logic)
         $isBooked = Pemesanan::where('villa_id', $request->villa_id)
-            ->whereIn('status_pembayaran', ['settlement', 'pending'])
-            ->where(function($query) use ($checkin, $checkout) {
-                $query->whereBetween('tanggal_checkin', [$checkin, $checkout->copy()->subMinute()])
-                      ->orWhereBetween('tanggal_checkout', [$checkin->copy()->addMinute(), $checkout])
-                      ->orWhere(function($q) use ($checkin, $checkout) {
-                          $q->where('tanggal_checkin', '<=', $checkin)
-                            ->where('tanggal_checkout', '>=', $checkout);
-                      });
+            ->whereNotIn('status_pemesanan', ['batal']) // Abaikan yang sudah dibatalkan
+            ->where(function($query) use ($request) {
+                $query->where('tanggal_checkin', '<', $request->tanggal_checkout)
+                      ->where('tanggal_checkout', '>', $request->tanggal_checkin);
             })
             ->exists();
 
@@ -118,7 +133,7 @@ class AdminReservasiController extends Controller
         Pemesanan::create([
             'tamu_id' => $tamu->id,
             'villa_id' => $villa->id,
-            'petugas_id' => auth()->id(),
+            'petugas_id' => \App\Models\Petugas::where('user_id', auth()->id())->first()?->id,
             'tanggal_checkin' => $request->tanggal_checkin,
             'tanggal_checkout' => $request->tanggal_checkout,
             'total_hari' => $totalDays,

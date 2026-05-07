@@ -1,4 +1,53 @@
 <x-app-layout>
+    <!-- Flatpickr CSS & Clean White Theme -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        .flatpickr-calendar {
+            background: #ffffff !important;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1) !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 1.5rem !important;
+            width: 350px !important;
+            padding: 10px !important;
+        }
+        .flatpickr-days, .dayContainer {
+            width: 330px !important;
+            min-width: 330px !important;
+            max-width: 330px !important;
+        }
+        .flatpickr-day {
+            max-width: 45px !important;
+            height: 45px !important;
+            line-height: 45px !important;
+        }
+        .flatpickr-months .flatpickr-month {
+            background: transparent !important;
+            color: #0f172a !important;
+            fill: #0f172a !important;
+        }
+        .flatpickr-current-month .flatpickr-monthDropdown-months {
+            font-weight: 800 !important;
+            font-size: 14px !important;
+        }
+        .flatpickr-weekday {
+            color: #94a3b8 !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+        }
+        .flatpickr-day {
+            border-radius: 10px !important;
+            color: #1e293b !important;
+            font-weight: 500 !important;
+            margin: 2px !important;
+        }
+        .flatpickr-day.selected {
+            background: #10b981 !important;
+            border-color: #10b981 !important;
+        }
+        .flatpickr-day.flatpickr-disabled {
+            color: #e2e8f0 !important;
+        }
+    </style>
     <div class="bg-white min-h-screen pb-24 font-sans animate__animated animate__fadeIn">
         
         {{-- ========= TOP NAVIGATION ========= --}}
@@ -150,9 +199,9 @@
                                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                                             <i data-lucide="calendar" class="w-4 h-4"></i>
                                         </div>
-                                        <input type="date" name="tanggal_checkin" id="checkin" 
+                                        <input type="text" name="tanggal_checkin" id="checkin" 
                                             class="block w-full pl-11 pr-3 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-all shadow-sm" 
-                                            required min="{{ date('Y-m-d') }}" max="2030-12-31">
+                                            required placeholder="Pilih Tanggal">
                                     </div>
                                     <x-input-error :messages="$errors->get('tanggal_checkin')" class="mt-2" />
                                 </div>
@@ -162,9 +211,9 @@
                                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                                             <i data-lucide="calendar-check" class="w-4 h-4"></i>
                                         </div>
-                                        <input type="date" name="tanggal_checkout" id="checkout" 
+                                        <input type="text" name="tanggal_checkout" id="checkout" 
                                             class="block w-full pl-11 pr-3 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-900 focus:bg-white focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-all shadow-sm" 
-                                            required max="2030-12-31">
+                                            required placeholder="Pilih Tanggal">
                                     </div>
                                     <x-input-error :messages="$errors->get('tanggal_checkout')" class="mt-2" />
                                 </div>
@@ -213,17 +262,51 @@
         .snap-always { scroll-snap-stop: always; }
     </style>
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const checkin = document.getElementById('checkin');
-            const checkout = document.getElementById('checkout');
+        document.addEventListener('DOMContentLoaded', async function () {
+            const checkinInput = document.getElementById('checkin');
+            const checkoutInput = document.getElementById('checkout');
             const pricePerNight = {{ $villa->harga_permalam }};
             const formatter = new Intl.NumberFormat('id-ID');
 
+            // Initialize Flatpickr
+            const checkinPicker = flatpickr("#checkin", {
+                minDate: "today",
+                dateFormat: "Y-m-d",
+                disable: [],
+                onChange: function(selectedDates, dateStr) {
+                    if (selectedDates.length > 0) {
+                        const nextDay = new Date(selectedDates[0]);
+                        nextDay.setDate(nextDay.getDate() + 1);
+                        checkoutPicker.set("minDate", nextDay);
+                        calculatePrice();
+                    }
+                }
+            });
+
+            const checkoutPicker = flatpickr("#checkout", {
+                minDate: new Date().getTime() + 24 * 60 * 60 * 1000, // Minimal Besok
+                dateFormat: "Y-m-d",
+                disable: [],
+                onChange: calculatePrice
+            });
+
+            // Fetch Booked Dates
+            try {
+                const response = await fetch(`/reservasi/booked-dates/{{ $villa->id }}`);
+                const data = await response.json();
+                const disabled = data.map(range => ({ from: range.start, to: range.end }));
+                checkinPicker.set("disable", disabled);
+                checkoutPicker.set("disable", disabled);
+            } catch (e) {
+                console.error("Gagal ambil data tanggal:", e);
+            }
+
             function calculatePrice() {
-                if (checkin.value && checkout.value) {
-                    const start = new Date(checkin.value);
-                    const end = new Date(checkout.value);
+                if (checkinInput.value && checkoutInput.value) {
+                    const start = new Date(checkinInput.value);
+                    const end = new Date(checkoutInput.value);
                     const diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
 
                     if (diffDays > 0) {
@@ -244,18 +327,6 @@
                 document.getElementById('totalBase').innerText = 'Rp 0';
                 document.getElementById('totalPrice').innerText = 'Rp ' + formatter.format(pricePerNight);
             }
-
-            checkin.addEventListener('change', function () {
-                let nextDay = new Date(this.value);
-                nextDay.setDate(nextDay.getDate() + 1);
-                checkout.min = nextDay.toISOString().split('T')[0];
-                if (checkout.value && checkout.value <= this.value) {
-                    checkout.value = checkout.min;
-                }
-                calculatePrice();
-            });
-
-            checkout.addEventListener('change', calculatePrice);
         });
     </script>
 </x-app-layout>

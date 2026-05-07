@@ -89,35 +89,70 @@
                 </div>
 
                 <script>
+                    let villaFilesDataTransfer = new DataTransfer();
+
                     function previewImages(input) {
+                        if (input.files && input.files.length > 0) {
+                            // Append new files to our DataTransfer object
+                            Array.from(input.files).forEach(file => {
+                                villaFilesDataTransfer.items.add(file);
+                            });
+                            
+                            // Update input files to match our DataTransfer object
+                            input.files = villaFilesDataTransfer.files;
+                            
+                            renderPreviews();
+                        }
+                    }
+
+                    function renderPreviews() {
                         const wrapper = document.getElementById('preview-container-wrapper');
                         const grid = document.getElementById('preview-grid');
+                        const input = document.getElementById('foto');
+                        
                         grid.innerHTML = '';
                         
-                        if (input.files && input.files.length > 0) {
+                        if (villaFilesDataTransfer.files.length > 0) {
                             wrapper.classList.remove('hidden');
                             
-                            Array.from(input.files).forEach(file => {
+                            Array.from(villaFilesDataTransfer.files).forEach((file, index) => {
                                 const reader = new FileReader();
                                 reader.onload = function(e) {
                                     const div = document.createElement('div');
                                     div.className = 'relative group aspect-video overflow-hidden rounded-2xl border border-slate-200 shadow-sm';
                                     div.innerHTML = `
                                         <img src="${e.target.result}" class="w-full h-full object-cover transition-transform group-hover:scale-110" />
-                                        <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <button type="button" onclick="removeNewImage(${index})" class="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg z-10">
+                                            <i data-lucide="x" class="w-4 h-4"></i>
+                                        </button>
+                                        <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                                             <i data-lucide="maximize-2" class="w-5 h-5 text-white"></i>
                                         </div>
                                     `;
                                     grid.appendChild(div);
-                                    if (window.lucide) {
-                                        window.lucide.createIcons();
-                                    }
+                                    if (window.lucide) window.lucide.createIcons();
                                 }
                                 reader.readAsDataURL(file);
                             });
                         } else {
                             wrapper.classList.add('hidden');
+                            input.value = ''; // Reset input
                         }
+                    }
+
+                    function removeNewImage(index) {
+                        const newDataTransfer = new DataTransfer();
+                        const files = villaFilesDataTransfer.files;
+                        
+                        for (let i = 0; i < files.length; i++) {
+                            if (i !== index) {
+                                newDataTransfer.items.add(files[i]);
+                            }
+                        }
+                        
+                        villaFilesDataTransfer = newDataTransfer;
+                        document.getElementById('foto').files = villaFilesDataTransfer.files;
+                        renderPreviews();
                     }
                 </script>
 
