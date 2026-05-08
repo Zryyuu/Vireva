@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/app_constants.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/villa_provider.dart';
-import '../../providers/admin_provider.dart';
-import '../../providers/booking_provider.dart';
-import 'widgets/guest_dashboard.dart';
+import '../../viewmodels/auth_viewmodel.dart';
+import '../../viewmodels/villa_viewmodel.dart';
+import '../../viewmodels/admin_viewmodel.dart';
+import '../../viewmodels/booking_viewmodel.dart';
+import 'widgets/beranda_tab.dart';
+import 'widgets/explore_tab.dart';
 import 'widgets/admin_dashboard.dart';
 import 'widgets/booking_history_list.dart';
 
@@ -23,19 +24,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      final auth = ref.read(authProvider);
-      if (auth.user?.role == 'tamu') {
-        ref.read(villaProvider.notifier).fetchVillas();
-        ref.read(bookingProvider.notifier).fetchBookings();
+      final auth = ref.read(authViewModelProvider);
+      if (auth.user?.isUser ?? true) {
+        ref.read(villaViewModelProvider.notifier).fetchVillas();
+        ref.read(bookingViewModelProvider.notifier).fetchBookings();
       } else {
-        ref.read(adminProvider.notifier).fetchStats();
+        ref.read(adminViewModelProvider.notifier).fetchBookings();
+        ref.read(villaViewModelProvider.notifier).fetchVillas();
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final auth = ref.watch(authProvider);
+    final auth = ref.watch(authViewModelProvider);
     
     if (!auth.isAuthenticated) {
       return const Scaffold(
@@ -45,9 +47,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
     }
 
-    final role = auth.user?.role ?? 'tamu';
-    
-    if (role != 'tamu') {
+    if (auth.user?.isAdmin ?? false) {
       return Scaffold(
         backgroundColor: AppColors.background,
         body: const SafeArea(child: AdminDashboard()),
@@ -55,7 +55,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
 
     final List<Widget> guestScreens = [
-      const GuestDashboard(),
+      const BerandaTab(),
+      const ExploreTab(),
       const BookingHistoryList(),
     ];
 
@@ -79,6 +80,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           unselectedLabelStyle: const TextStyle(fontSize: 12),
           type: BottomNavigationBarType.fixed,
           items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard_outlined),
+              activeIcon: Icon(Icons.dashboard_rounded),
+              label: 'BERANDA',
+            ),
             BottomNavigationBarItem(
               icon: Icon(Icons.explore_outlined),
               activeIcon: Icon(Icons.explore_rounded),

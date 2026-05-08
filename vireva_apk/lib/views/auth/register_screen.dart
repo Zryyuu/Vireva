@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/app_constants.dart';
-import '../../providers/auth_provider.dart';
+import '../../viewmodels/auth_viewmodel.dart';
 import '../home/home_screen.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -32,7 +32,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final authState = ref.watch(authProvider);
+    final authState = ref.watch(authViewModelProvider);
     
     return Scaffold(
       appBar: AppBar(
@@ -113,11 +113,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ? null 
                     : () async {
                       if (_formKey.currentState!.validate()) {
-                        final error = await ref.read(authProvider.notifier).register(
+                        final success = await ref.read(authViewModelProvider.notifier).register(
                           _nameController.text,
                           _emailController.text,
                           _passwordController.text,
                         );
+                        final error = success ? null : ref.read(authViewModelProvider).error;
                         
                         if (error != null && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(

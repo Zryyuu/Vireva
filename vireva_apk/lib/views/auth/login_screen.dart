@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../providers/auth_provider.dart';
+import '../../viewmodels/auth_viewmodel.dart';
 import '../../core/app_constants.dart';
 import '../home/home_screen.dart';
 import 'register_screen.dart';
@@ -20,7 +20,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = ref.watch(authProvider);
+    final auth = ref.watch(authViewModelProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -170,10 +170,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         onPressed: auth.isLoading 
                           ? null 
                           : () async {
-                            final error = await ref.read(authProvider.notifier).login(
-                              _emailController.text, 
-                              _passwordController.text
+                            final success = await ref.read(authViewModelProvider.notifier).login(
+                              _emailController.text,
+                              _passwordController.text,
                             );
+                            final error = success ? null : ref.read(authViewModelProvider).error;
                             
                             if (error != null && context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(

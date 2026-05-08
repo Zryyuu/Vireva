@@ -44,6 +44,19 @@ Route::middleware('auth:sanctum')->group(function () {
 // Midtrans Callback (Disabled)
 // Route::post('/midtrans/callback', [PaymentCallbackController::class, 'handle']);
 
+// Storage Proxy with CORS for Flutter Web Local Development
+Route::get('/storage-cors/{path}', function ($path) {
+    $filePath = storage_path('app/public/' . $path);
+    if (file_exists($filePath)) {
+        return response()->file($filePath, [
+            'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers' => 'Content-Type, Authorization',
+        ]);
+    }
+    abort(404);
+})->where('path', '.*');
+
 // Public API
 Route::get('/villas', [VillaController::class, 'index']);
 Route::get('/villas/{villa}', [VillaController::class, 'show']);

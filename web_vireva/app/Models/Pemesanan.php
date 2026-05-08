@@ -59,6 +59,6 @@ class Pemesanan extends Model
 
     public function getBuktiUrlAttribute()
     {
-        return $this->bukti_pembayaran ? url('storage/' . $this->bukti_pembayaran) : null;
+        return $this->bukti_pembayaran ? url('api/storage-cors/' . $this->bukti_pembayaran) : null;
     }
 }

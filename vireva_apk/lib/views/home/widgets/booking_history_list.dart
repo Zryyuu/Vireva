@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
+
 import '../../../core/app_constants.dart';
-import '../../../providers/booking_provider.dart';
+import '../../../viewmodels/booking_viewmodel.dart';
 import 'dashboard_header.dart';
 
 class BookingHistoryList extends ConsumerWidget {
@@ -11,11 +10,11 @@ class BookingHistoryList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bookingState = ref.watch(bookingProvider);
+    final bookingState = ref.watch(bookingViewModelProvider);
     final theme = Theme.of(context);
 
     return RefreshIndicator(
-      onRefresh: () => ref.read(bookingProvider.notifier).fetchBookings(),
+      onRefresh: () => ref.read(bookingViewModelProvider.notifier).fetchBookings(),
       color: AppColors.primary,
       child: CustomScrollView(
         slivers: [
@@ -69,29 +68,38 @@ class _BookingHistoryCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final status = booking['status_pembayaran'] ?? 'pending';
-    final bookingId = booking['id'];
+    final status = booking.statusPemesanan;
+    final bookingId = booking.id;
     
     Color statusColor;
     String statusText;
     switch (status) {
-      case 'settlement': 
-        statusColor = AppColors.success; 
-        statusText = 'LUNAS';
+      case 'aktif': 
+        statusColor = Colors.blue; 
+        statusText = 'SEDANG MENGINAP';
         break;
-      case 'pending': 
-        statusColor = Colors.orange; 
-        statusText = 'MENUNGGU PEMBAYARAN';
+      case 'selesai': 
+        statusColor = AppColors.textSecondary; 
+        statusText = 'SELESAI';
         break;
-      case 'expire':
-      case 'cancel': 
+      case 'batal': 
         statusColor = AppColors.error; 
-        statusText = 'DIBATALKAN';
+        statusText = 'BATAL';
         break;
+      case 'menunggu':
       default: 
-        statusColor = AppColors.textSecondary;
-        statusText = status.toString().toUpperCase();
+        if (booking.statusPembayaran == 'pending') {
+          statusColor = AppColors.textMuted;
+          statusText = 'MENUNGGU KONFIRMASI';
+        } else {
+          statusColor = AppColors.primary;
+          statusText = 'TERKONFIRMASI';
+        }
     }
+
+    final checkinDate = DateTime.parse(booking.tanggalCheckin);
+    final checkoutDate = DateTime.parse(booking.tanggalCheckout);
+    final duration = checkoutDate.difference(checkinDate).inDays;
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.p16),
@@ -106,108 +114,162 @@ class _BookingHistoryCard extends ConsumerWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(
-                  booking['villa']['nama_villa'] ?? 'Villa',
-                  style: theme.textTheme.titleMedium,
-                  overflow: TextOverflow.ellipsis,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('NO. RESERVASI', style: TextStyle(fontSize: 8, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                  Text(
+                    '#VRV-${bookingId.toString().padLeft(5, '0')}',
+                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+                  ),
+                ],
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
+                  color: statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(100),
                 ),
-                child: Text(
-                  statusText,
-                  style: GoogleFonts.spaceGrotesk(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: statusColor,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(width: 4, height: 4, decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle)),
+                    const SizedBox(width: 4),
+                    Text(
+                      statusText,
+                      style: TextStyle(
+                        fontSize: 8,
+                        fontWeight: FontWeight.w900,
+                        color: statusColor,
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.p20),
+          Text(
+            booking.villa?.nama ?? 'Villa',
+            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.border),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              booking.villa?.tipe?.toUpperCase() ?? 'VILLA',
+              style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.p20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('CHECK-IN', style: TextStyle(fontSize: 8, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                  Text(_formatDateShort(booking.tanggalCheckin), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900)),
+                ],
+              ),
+              const Icon(Icons.arrow_forward_rounded, size: 14, color: AppColors.textSecondary),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const Text('CHECK-OUT', style: TextStyle(fontSize: 8, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                  Text(_formatDateShort(booking.tanggalCheckout), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900)),
+                ],
               ),
             ],
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              const Icon(Icons.calendar_today_rounded, size: 14, color: AppColors.textSecondary),
-              const SizedBox(width: 8),
-              Text(
-                '${booking['tanggal_checkin']} - ${booking['tanggal_checkout']}',
-                style: theme.textTheme.bodySmall,
-              ),
-            ],
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(100),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              '$duration Malam Menginap',
+              style: const TextStyle(color: AppColors.primary, fontSize: 8, fontWeight: FontWeight.w900),
+            ),
           ),
-          const Divider(height: 24, color: AppColors.border),
+          const SizedBox(height: 20),
+          const Divider(height: 1, color: AppColors.border),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                'Total Biaya',
-                style: theme.textTheme.bodySmall,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('TOTAL TAGIHAN', style: TextStyle(fontSize: 8, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                  Text(
+                    booking.formattedTotalBiaya,
+                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+                  ),
+                ],
               ),
-              Text(
-                'Rp ${booking['total_biaya']}',
-                style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: AppColors.primary),
-              ),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      // Navigate to details
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E2432),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.visibility_rounded, size: 16, color: Colors.white),
+                    ),
+                  ),
+                  if (status == 'menunggu' || status == 'aktif') ...[
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () {
+                        // Action to cancel booking
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.error.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.close_rounded, size: 16, color: AppColors.error),
+                      ),
+                    ),
+                  ],
+                ],
+              )
             ],
           ),
-          
-          if (status == 'pending') ...[
-            const SizedBox(height: AppSpacing.p16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  final picker = ImagePicker();
-                  final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-                  
-                  if (image != null) {
-                    final success = await ref.read(bookingProvider.notifier).uploadBukti(bookingId, image.path);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(success ? 'Bukti berhasil diupload!' : 'Gagal upload bukti'),
-                          backgroundColor: success ? AppColors.success : AppColors.error,
-                        ),
-                      );
-                    }
-                  }
-                },
-                icon: const Icon(Icons.upload_file_rounded, size: 18),
-                label: const Text('UPLOAD BUKTI BAYAR'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              '*Silakan transfer ke Rekening BCA: 123456789 a/n Vireva Villa',
-              style: TextStyle(fontSize: 10, color: AppColors.textSecondary, fontStyle: FontStyle.italic),
-            ),
-          ],
-          
-          if (booking['bukti_pembayaran'] != null && status == 'pending') ...[
-             const SizedBox(height: 8),
-             Row(
-               children: [
-                 const Icon(Icons.hourglass_bottom_rounded, size: 14, color: Colors.orange),
-                 const SizedBox(width: 4),
-                 Text(
-                   'Menunggu verifikasi admin',
-                   style: theme.textTheme.bodySmall?.copyWith(color: Colors.orange, fontWeight: FontWeight.bold),
-                 ),
-               ],
-             ),
-          ],
         ],
       ),
     );
+  }
+
+  String _getMonthShort(int month) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    return months[month - 1];
+  }
+
+  String _formatDateShort(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      return '${date.day.toString().padLeft(2, '0')} ${_getMonthShort(date.month)} ${date.year}';
+    } catch (_) {
+      return dateStr;
+    }
   }
 }

@@ -23,12 +23,17 @@ class ApiAdminController extends Controller
             'jumlah_bathroom' => 'required|integer',
             'luas_bangunan' => 'nullable|integer',
             'deskripsi' => 'nullable',
-            'foto' => 'nullable|image|max:10240',
+            'foto' => 'nullable|array',
+            'foto.*' => 'image|max:10240',
         ]);
 
+        $fotoPaths = [];
         if ($request->hasFile('foto')) {
-            $validated['foto'] = $request->file('foto')->store('villas', 'public');
+            foreach ($request->file('foto') as $file) {
+                $fotoPaths[] = $file->store('villas', 'public');
+            }
         }
+        $validated['foto'] = $fotoPaths;
 
         $villa = Villa::create($validated);
 
@@ -51,15 +56,34 @@ class ApiAdminController extends Controller
             'jumlah_bathroom' => 'required|integer',
             'luas_bangunan' => 'nullable|integer',
             'deskripsi' => 'nullable',
-            'foto' => 'nullable|image|max:10240',
+            'foto' => 'nullable|array',
+            'foto.*' => 'image|max:10240',
         ]);
 
-        if ($request->hasFile('foto')) {
-            if ($villa->foto) {
-                Storage::disk('public')->delete($villa->foto);
-            }
-            $validated['foto'] = $request->file('foto')->store('villas', 'public');
+        // Handle existing photos
+        $existingPhotos = $villa->foto ?? [];
+        $keepPhotos = $request->input('old_foto', []);
+        if (!is_array($keepPhotos)) {
+            $keepPhotos = [$keepPhotos]; // fallback if single value sent improperly
         }
+        
+        // Delete photos that were removed in the UI
+        foreach ($existingPhotos as $photo) {
+            if (!in_array($photo, $keepPhotos)) {
+                Storage::disk('public')->delete($photo);
+            }
+        }
+        
+        $fotoPaths = $keepPhotos;
+
+        // Handle new uploads
+        if ($request->hasFile('foto')) {
+            foreach ($request->file('foto') as $file) {
+                $fotoPaths[] = $file->store('villas', 'public');
+            }
+        }
+        
+        $validated['foto'] = $fotoPaths;
 
         $villa->update($validated);
 
@@ -217,6 +241,8 @@ class ApiAdminController extends Controller
         $bookings = Pemesanan::with(['villa', 'tamu'])
             ->orderBy('created_at', 'desc')
             ->get();
+        
+        \Illuminate\Support\Facades\Log::info('Returning ' . $bookings->count() . ' bookings for admin.');
         
         return response()->json($bookings);
     }

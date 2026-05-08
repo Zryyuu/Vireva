@@ -59,6 +59,7 @@ class DatabaseSeeder extends Seeder
                 'jumlah_bathroom' => 1,
                 'luas_bangunan' => 120,
                 'deskripsi' => 'Villa pribadi yang tenang dengan kolam renang indoor, desain minimalis modern, dan taman tropis yang asri.',
+                'foto' => ['villas/GM2RHvCzpPBWjWeMMqNUPhjG9L9eHfJEJuA5Hpwh.jpg'],
             ]
         );
 
@@ -73,6 +74,7 @@ class DatabaseSeeder extends Seeder
                 'jumlah_bathroom' => 2,
                 'luas_bangunan' => 250,
                 'deskripsi' => 'Hunian mewah keluarga dengan pemandangan lembah, dapur lengkap, dan area lounge outdoor yang luas.',
+                'foto' => ['villas/LSiYZi4MYaIG0zIwLlbD2KHagijWhIPWwUnDIreD.jpg'],
             ]
         );
 
@@ -87,7 +89,10 @@ class DatabaseSeeder extends Seeder
                 'jumlah_bathroom' => 4,
                 'luas_bangunan' => 450,
                 'deskripsi' => 'Puncak kemewahan Vireva. Dilengkapi fasilitas bioskop pribadi, kolam renang infinity, dan layanan butler 24 jam.',
+                'foto' => ['villas/rdkhB1k8E4OFzIXwv88HF9XeuW5ajvbRaHGaAEyg.jpg'],
             ]
         );
+
+        $this->call(RekayasaDataSeeder::class);
     }
 }

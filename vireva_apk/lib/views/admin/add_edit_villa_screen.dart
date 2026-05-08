@@ -1,10 +1,11 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../core/app_constants.dart';
 import '../../models/villa_model.dart';
-import '../../providers/villa_provider.dart';
+import '../../viewmodels/villa_viewmodel.dart';
 
 class AddEditVillaScreen extends ConsumerStatefulWidget {
   final VillaModel? villa;
@@ -25,7 +26,9 @@ class _AddEditVillaScreenState extends ConsumerState<AddEditVillaScreen> {
   late TextEditingController _deskripsiController;
   
   String _tipeVilla = 'Villa 1 Kamar Tidur';
-  File? _imageFile;
+  String _statusVilla = 'tersedia';
+  final List<XFile> _newImages = [];
+  List<String> _oldImages = [];
   bool _isSubmitting = false;
 
   @override
@@ -40,15 +43,21 @@ class _AddEditVillaScreenState extends ConsumerState<AddEditVillaScreen> {
     _deskripsiController = TextEditingController(text: widget.villa?.deskripsi);
     if (widget.villa != null) {
       _tipeVilla = widget.villa!.tipe;
+      
+      // Handle status gracefully if it is something unexpected
+      if (['tersedia', 'terisi', 'maintenance'].contains(widget.villa!.statusVilla)) {
+        _statusVilla = widget.villa!.statusVilla;
+      }
+      _oldImages = List.from(widget.villa!.rawImages);
     }
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImages() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
+    final pickedFiles = await picker.pickMultiImage();
+    if (pickedFiles.isNotEmpty) {
       setState(() {
-        _imageFile = File(pickedFile.path);
+        _newImages.addAll(pickedFiles);
       });
     }
   }
@@ -67,13 +76,14 @@ class _AddEditVillaScreenState extends ConsumerState<AddEditVillaScreen> {
       'jumlah_bathroom': _bathroomController.text,
       'luas_bangunan': _luasController.text,
       'deskripsi': _deskripsiController.text,
+      'status_villa': _statusVilla,
     };
 
     bool success;
     if (widget.villa != null) {
-      success = await ref.read(villaProvider.notifier).updateVilla(widget.villa!.id, data, _imageFile?.path);
+      success = await ref.read(villaViewModelProvider.notifier).updateVilla(widget.villa!.id, data, _newImages, _oldImages);
     } else {
-      success = await ref.read(villaProvider.notifier).addVilla(data, _imageFile?.path);
+      success = await ref.read(villaViewModelProvider.notifier).addVilla(data, _newImages);
     }
 
     setState(() => _isSubmitting = false);
@@ -85,7 +95,7 @@ class _AddEditVillaScreenState extends ConsumerState<AddEditVillaScreen> {
       Navigator.pop(context);
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(ref.read(villaProvider).error ?? 'Gagal menyimpan villa'), backgroundColor: AppColors.error),
+        SnackBar(content: Text(ref.read(villaViewModelProvider).error ?? 'Gagal menyimpan villa'), backgroundColor: AppColors.error),
       );
     }
   }
@@ -114,11 +124,21 @@ class _AddEditVillaScreenState extends ConsumerState<AddEditVillaScreen> {
               const SizedBox(height: AppSpacing.p20),
               Row(
                 children: [
-                  Expanded(child: _buildTextField('BEDROOM', _bedroomController, '1', theme, keyboardType: TextInputType.number)),
+                  Expanded(child: _buildTextField('KAMAR TIDUR', _bedroomController, '1', theme, keyboardType: TextInputType.number)),
                   const SizedBox(width: AppSpacing.p16),
-                  Expanded(child: _buildTextField('BATHROOM', _bathroomController, '1', theme, keyboardType: TextInputType.number)),
+                  Expanded(child: _buildTextField('KAMAR MANDI', _bathroomController, '1', theme, keyboardType: TextInputType.number)),
                 ],
               ),
+              const SizedBox(height: AppSpacing.p20),
+              Row(
+                children: [
+                  Expanded(child: _buildTextField('KAPASITAS TAMU', _kapasitasController, '2', theme, keyboardType: TextInputType.number)),
+                  const SizedBox(width: AppSpacing.p16),
+                  Expanded(child: _buildTextField('LUAS (m²)', _luasController, '120', theme, keyboardType: TextInputType.number)),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.p20),
+              _buildStatusDropdown('STATUS VILLA', theme),
               const SizedBox(height: AppSpacing.p20),
               _buildTextField('DESKRIPSI', _deskripsiController, 'Ceritakan tentang villa ini...', theme, maxLines: 4),
               const SizedBox(height: AppSpacing.p48),
@@ -142,36 +162,130 @@ class _AddEditVillaScreenState extends ConsumerState<AddEditVillaScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('FOTO VILLA', style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 1)),
-        const SizedBox(height: 12),
-        GestureDetector(
-          onTap: _pickImage,
-          child: Container(
-            width: double.infinity,
-            height: 200,
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppSpacing.radius),
-              border: Border.all(color: AppColors.border),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('GALERI VILLA', style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 1)),
+            TextButton.icon(
+              onPressed: _pickImages,
+              icon: const Icon(Icons.add_photo_alternate, size: 18),
+              label: const Text('Tambah Foto'),
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+              ),
             ),
-            child: _imageFile != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(AppSpacing.radius),
-                    child: Image.file(_imageFile!, fit: BoxFit.cover),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (_oldImages.isEmpty && _newImages.isEmpty)
+          GestureDetector(
+            onTap: _pickImages,
+            child: Container(
+              width: double.infinity,
+              height: 160,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(AppSpacing.radius),
+                border: Border.all(color: AppColors.border, style: BorderStyle.solid),
+              ),
+              child: const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.collections_outlined, size: 48, color: AppColors.primary),
+                  SizedBox(height: 12),
+                  Text('Klik untuk memilih foto villa', style: TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+          )
+        else
+          SizedBox(
+            height: 120,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                // Display old images (existing)
+                for (int i = 0; i < _oldImages.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: _buildImageThumbnail(
+                      isNetwork: true,
+                      // For viewing, we need the full URL. We use allImages assuming it aligns by index with rawImages
+                      imageUrl: widget.villa!.allImages.length > i ? widget.villa!.allImages[i] : '',
+                      onDelete: () {
+                        setState(() {
+                          _oldImages.removeAt(i);
+                        });
+                      },
+                    ),
+                  ),
+                // Display new images
+                for (int i = 0; i < _newImages.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: _buildImageThumbnail(
+                      isNetwork: false,
+                      xfile: _newImages[i],
+                      onDelete: () {
+                        setState(() {
+                          _newImages.removeAt(i);
+                        });
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildImageThumbnail({
+    required bool isNetwork,
+    String? imageUrl,
+    XFile? xfile,
+    required VoidCallback onDelete,
+  }) {
+    ImageProvider? imageProvider;
+    if (isNetwork && imageUrl != null) {
+      imageProvider = NetworkImage(imageUrl);
+    } else if (xfile != null) {
+      if (kIsWeb) {
+        imageProvider = NetworkImage(xfile.path);
+      } else {
+        imageProvider = FileImage(File(xfile.path));
+      }
+    }
+
+    return Stack(
+      children: [
+        Container(
+          width: 160,
+          height: 120,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            border: Border.all(color: AppColors.border),
+            image: imageProvider != null
+                ? DecorationImage(
+                    fit: BoxFit.cover,
+                    image: imageProvider,
                   )
-                : (widget.villa?.imageUrl != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(AppSpacing.radius),
-                        child: Image.network(widget.villa!.imageUrl!, fit: BoxFit.cover),
-                      )
-                    : const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.add_photo_alternate_outlined, size: 48, color: AppColors.primary),
-                          SizedBox(height: 12),
-                          Text('Klik untuk pilih foto villa'),
-                        ],
-                      )),
+                : null,
+          ),
+        ),
+        Positioned(
+          top: 4,
+          right: 4,
+          child: GestureDetector(
+            onTap: onDelete,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, size: 16, color: Colors.white),
+            ),
           ),
         ),
       ],
@@ -232,6 +346,41 @@ class _AddEditVillaScreenState extends ConsumerState<AddEditVillaScreen> {
               }).toList(),
               onChanged: (val) {
                 setState(() => _tipeVilla = val!);
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusDropdown(String label, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 1)),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _statusVilla,
+              isExpanded: true,
+              icon: const Icon(Icons.keyboard_arrow_down_rounded),
+              items: const [
+                DropdownMenuItem(value: 'tersedia', child: Text('Tersedia')),
+                DropdownMenuItem(value: 'terisi', child: Text('Terisi')),
+                DropdownMenuItem(value: 'maintenance', child: Text('Maintenance')),
+              ],
+              onChanged: (val) {
+                if (val != null) {
+                  setState(() => _statusVilla = val);
+                }
               },
             ),
           ),

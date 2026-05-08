@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/app_constants.dart';
-import '../../../providers/auth_provider.dart';
+import '../../../viewmodels/auth_viewmodel.dart';
 
 class DashboardHeader extends ConsumerWidget {
   final String title;
@@ -9,7 +9,7 @@ class DashboardHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authProvider).user;
+    final user = ref.watch(authViewModelProvider).user;
     final theme = Theme.of(context);
     
     return SliverToBoxAdapter(
@@ -75,7 +75,7 @@ class DashboardHeader extends ConsumerWidget {
               ),
               child: IconButton(
                 icon: const Icon(Icons.logout_rounded, color: AppColors.error, size: 22),
-                onPressed: () => ref.read(authProvider.notifier).logout(),
+                onPressed: () => ref.read(authViewModelProvider.notifier).logout(),
               ),
             ),
           ],

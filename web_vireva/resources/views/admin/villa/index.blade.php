@@ -99,10 +99,6 @@
                                     <i data-lucide="users" class="w-3.5 h-3.5 text-emerald-600"></i>
                                     {{ $item->kapasitas }} Tamu
                                 </div>
-                                <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-bold text-slate-600 uppercase tracking-tight">
-                                    <i data-lucide="waves" class="w-3.5 h-3.5 text-emerald-600"></i>
-                                    Kolam Renang
-                                </div>
                             </div>
                             
                             <div class="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100 mt-auto">

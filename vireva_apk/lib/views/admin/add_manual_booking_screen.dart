@@ -4,8 +4,8 @@ import 'package:intl/intl.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import '../../core/app_constants.dart';
-import '../../providers/booking_provider.dart';
-import '../../providers/villa_provider.dart';
+import '../../viewmodels/admin_viewmodel.dart';
+import '../../viewmodels/villa_viewmodel.dart';
 
 class AddManualBookingScreen extends ConsumerStatefulWidget {
   const AddManualBookingScreen({super.key});
@@ -28,14 +28,14 @@ class _AddManualBookingScreenState extends ConsumerState<AddManualBookingScreen>
   void initState() {
     super.initState();
     Future.microtask(() {
-      ref.read(villaProvider.notifier).fetchVillas();
+      ref.read(villaViewModelProvider.notifier).fetchVillas();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final villaState = ref.watch(villaProvider);
-    final bookingState = ref.watch(bookingProvider);
+    final villaState = ref.watch(villaViewModelProvider);
+    final adminState = ref.watch(adminViewModelProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -123,8 +123,8 @@ class _AddManualBookingScreenState extends ConsumerState<AddManualBookingScreen>
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: (bookingState.isLoading || villaState.isLoading) ? null : _submit,
-                  child: bookingState.isLoading
+                  onPressed: (adminState.isLoading || villaState.isLoading) ? null : _submit,
+                  child: adminState.isLoading
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                       : const Text('SIMPAN PESANAN'),
                 ),
@@ -186,7 +186,45 @@ class _AddManualBookingScreenState extends ConsumerState<AddManualBookingScreen>
 
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
-      final success = await ref.read(bookingProvider.notifier).createManualBooking(
+      // Validasi overlap tanggal dari data bookings di adminState
+      final adminState = ref.read(adminViewModelProvider);
+      final conflictingBookings = adminState.bookings.where((b) {
+        if (b.villa?.id != _selectedVillaId) return false;
+        // Hanya cek pemesanan yang masih aktif/menunggu
+        if (b.statusPemesanan == 'batal' || b.statusPemesanan == 'selesai') return false;
+        
+        try {
+          final bCheckin = DateTime.parse(b.tanggalCheckin);
+          final bCheckout = DateTime.parse(b.tanggalCheckout);
+          
+          // Strip time for pure date comparison
+          final newCheckin = DateTime(_checkinDate.year, _checkinDate.month, _checkinDate.day);
+          final newCheckout = DateTime(_checkoutDate.year, _checkoutDate.month, _checkoutDate.day);
+          final existingCheckin = DateTime(bCheckin.year, bCheckin.month, bCheckin.day);
+          final existingCheckout = DateTime(bCheckout.year, bCheckout.month, bCheckout.day);
+          
+          // Logika Overlap: Jika check-in baru mendahului check-out lama, 
+          // DAN check-out baru melewati check-in lama.
+          return newCheckin.isBefore(existingCheckout) && newCheckout.isAfter(existingCheckin);
+        } catch (_) {
+          return false;
+        }
+      }).toList();
+
+      if (conflictingBookings.isNotEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Gagal: Villa sudah dipesan pada tanggal tersebut.'),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        return;
+      }
+
+      final success = await ref.read(adminViewModelProvider.notifier).createManualBooking(
         {
           'nama_tamu': _nameController.text,
           'no_hape': _phoneController.text,
@@ -200,7 +238,11 @@ class _AddManualBookingScreenState extends ConsumerState<AddManualBookingScreen>
       if (success && mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pemesanan manual berhasil disimpan!')),
+          const SnackBar(
+            content: Text('Pemesanan manual berhasil disimpan!'),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     }

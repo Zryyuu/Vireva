@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/app_constants.dart';
 import '../../models/villa_model.dart';
-import '../../providers/booking_provider.dart';
+import '../../viewmodels/booking_viewmodel.dart';
 
 class DetailVillaScreen extends ConsumerStatefulWidget {
   final VillaModel villa;
@@ -16,15 +16,62 @@ class DetailVillaScreen extends ConsumerStatefulWidget {
 }
 
 class _DetailVillaScreenState extends ConsumerState<DetailVillaScreen> {
-  DateTime _checkinDate = DateTime.now();
-  DateTime _checkoutDate = DateTime.now().add(const Duration(days: 1));
+  DateTime? _checkinDate;
+  DateTime? _checkoutDate;
+
+  bool _isDateAvailable(DateTime day) {
+    final dayOnly = DateTime(day.year, day.month, day.day);
+    for (var booking in widget.villa.bookedDates) {
+      try {
+        final ci = DateTime.parse(booking['checkin']!);
+        final co = DateTime.parse(booking['checkout']!);
+        final ciOnly = DateTime(ci.year, ci.month, ci.day);
+        final coOnly = DateTime(co.year, co.month, co.day);
+        
+        // Disable dates from Check-in up to Check-out (inclusive).
+        // This matches the web frontend (Flatpickr) behavior which blocks both from and to dates.
+        if (!dayOnly.isBefore(ciOnly) && !dayOnly.isAfter(coOnly)) {
+          return false;
+        }
+      } catch (_) {}
+    }
+    return true;
+  }
+
+  DateTime _getFirstAvailableDate(DateTime start) {
+    DateTime current = start;
+    // Limit to 365 days to prevent infinite loop
+    for (int i = 0; i < 365; i++) {
+      if (_isDateAvailable(current)) return current;
+      current = current.add(const Duration(days: 1));
+    }
+    return start;
+  }
 
   Future<void> _selectDate(BuildContext context, bool isCheckin) async {
+    final now = DateTime.now();
+    final firstValidCheckin = _getFirstAvailableDate(now);
+    
+    DateTime initial;
+    DateTime first;
+    
+    if (isCheckin) {
+      first = now;
+      initial = _checkinDate ?? firstValidCheckin;
+      if (!_isDateAvailable(initial)) initial = firstValidCheckin;
+    } else {
+      final baseDate = _checkinDate ?? firstValidCheckin;
+      first = baseDate.add(const Duration(days: 1));
+      initial = _checkoutDate ?? _getFirstAvailableDate(first);
+      if (!_isDateAvailable(initial)) initial = _getFirstAvailableDate(first);
+    }
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: isCheckin ? _checkinDate : _checkoutDate,
-      firstDate: isCheckin ? DateTime.now() : _checkinDate.add(const Duration(days: 1)),
-      lastDate: DateTime.now().add(const Duration(days: 3650)),
+      initialDate: initial,
+      firstDate: first,
+      lastDate: now.add(const Duration(days: 3650)),
+      selectableDayPredicate: _isDateAvailable,
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -42,8 +89,9 @@ class _DetailVillaScreenState extends ConsumerState<DetailVillaScreen> {
       setState(() {
         if (isCheckin) {
           _checkinDate = picked;
-          if (_checkoutDate.isBefore(_checkinDate)) {
-            _checkoutDate = _checkinDate.add(const Duration(days: 1));
+          // If checkout is before new checkin, reset checkout
+          if (_checkoutDate != null && _checkoutDate!.isBefore(_checkinDate!)) {
+            _checkoutDate = null;
           }
         } else {
           _checkoutDate = picked;
@@ -54,7 +102,7 @@ class _DetailVillaScreenState extends ConsumerState<DetailVillaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bookingState = ref.watch(bookingProvider);
+    final bookingState = ref.watch(bookingViewModelProvider);
     final theme = Theme.of(context);
     final villa = widget.villa;
 
@@ -126,11 +174,12 @@ class _DetailVillaScreenState extends ConsumerState<DetailVillaScreen> {
                   ),
                   const SizedBox(height: AppSpacing.p24),
                   
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Wrap(
+                    spacing: AppSpacing.p8,
+                    runSpacing: AppSpacing.p8,
                     children: [
-                      _buildInfoTile(Icons.bed_rounded, '${villa.bedroom} BR', theme),
-                      _buildInfoTile(Icons.bathtub_rounded, '${villa.bathroom} BA', theme),
+                      _buildInfoTile(Icons.bed_rounded, '${villa.bedroom} KAMAR', theme),
+                      _buildInfoTile(Icons.bathtub_rounded, '${villa.bathroom} MANDI', theme),
                       _buildInfoTile(Icons.square_foot_rounded, '${villa.luas} m²', theme),
                     ],
                   ),
@@ -152,11 +201,17 @@ class _DetailVillaScreenState extends ConsumerState<DetailVillaScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: _buildDateTile('CHECK-IN', DateFormat('dd MMM yyyy').format(_checkinDate), () => _selectDate(context, true), theme),
+                        child: _buildDateTile('CHECK-IN', _checkinDate != null ? DateFormat('dd MMM yyyy').format(_checkinDate!) : 'Pilih Tanggal', () => _selectDate(context, true), theme),
                       ),
                       const SizedBox(width: AppSpacing.p16),
                       Expanded(
-                        child: _buildDateTile('CHECK-OUT', DateFormat('dd MMM yyyy').format(_checkoutDate), () => _selectDate(context, false), theme),
+                        child: _buildDateTile('CHECK-OUT', _checkoutDate != null ? DateFormat('dd MMM yyyy').format(_checkoutDate!) : 'Pilih Tanggal', () {
+                          if (_checkinDate == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pilih tanggal Check-in terlebih dahulu')));
+                            return;
+                          }
+                          _selectDate(context, false);
+                        }, theme),
                       ),
                     ],
                   ),
@@ -192,23 +247,33 @@ class _DetailVillaScreenState extends ConsumerState<DetailVillaScreen> {
             Expanded(
               flex: 2,
               child: ElevatedButton(
-                onPressed: bookingState.isLoading 
+                onPressed: (bookingState.isLoading || _checkinDate == null || _checkoutDate == null)
                   ? null 
                   : () async {
                     try {
-                      final success = await ref.read(bookingProvider.notifier).createBooking(
+                      final success = await ref.read(bookingViewModelProvider.notifier).createBooking(
                         villaId: villa.id,
-                        checkin: DateFormat('yyyy-MM-dd').format(_checkinDate),
-                        checkout: DateFormat('yyyy-MM-dd').format(_checkoutDate),
+                        checkin: DateFormat('yyyy-MM-dd').format(_checkinDate!),
+                        checkout: DateFormat('yyyy-MM-dd').format(_checkoutDate!),
                       );
 
-                      if (context.mounted && success) {
-                        _showSuccessDialog(context, theme);
+                      if (context.mounted) {
+                        if (success) {
+                          _showSuccessDialog(context, theme);
+                        } else {
+                          final errorMsg = ref.read(bookingViewModelProvider).error ?? 'Terjadi kesalahan saat memproses pesanan.';
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(errorMsg.replaceAll('Exception: ', '')),
+                              backgroundColor: AppColors.error,
+                            ),
+                          );
+                        }
                       }
                     } catch (e) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error),
+                          SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: AppColors.error),
                         );
                       }
                     }

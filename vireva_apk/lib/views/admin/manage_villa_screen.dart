@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/app_constants.dart';
-import '../../providers/villa_provider.dart';
+import '../../viewmodels/villa_viewmodel.dart';
 import '../../models/villa_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'add_edit_villa_screen.dart';
@@ -18,7 +18,7 @@ class _ManageVillaScreenState extends ConsumerState<ManageVillaScreen> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      ref.read(villaProvider.notifier).fetchVillas();
+      ref.read(villaViewModelProvider.notifier).fetchVillas();
     });
   }
 
@@ -37,7 +37,7 @@ class _ManageVillaScreenState extends ConsumerState<ManageVillaScreen> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              final success = await ref.read(villaProvider.notifier).deleteVilla(villa.id);
+              final success = await ref.read(villaViewModelProvider.notifier).deleteVilla(villa.id);
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -56,7 +56,7 @@ class _ManageVillaScreenState extends ConsumerState<ManageVillaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final villaState = ref.watch(villaProvider);
+    final villaState = ref.watch(villaViewModelProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -66,7 +66,7 @@ class _ManageVillaScreenState extends ConsumerState<ManageVillaScreen> {
       body: villaState.isLoading && villaState.villas.isEmpty
           ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
           : RefreshIndicator(
-              onRefresh: () => ref.read(villaProvider.notifier).fetchVillas(),
+              onRefresh: () => ref.read(villaViewModelProvider.notifier).fetchVillas(),
               color: AppColors.primary,
               child: ListView.builder(
                 padding: const EdgeInsets.all(AppSpacing.p24),

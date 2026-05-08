@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/app_constants.dart';
-import '../../../providers/auth_provider.dart';
-import '../../../providers/admin_provider.dart';
+import '../../../viewmodels/admin_viewmodel.dart';
+import '../../../viewmodels/villa_viewmodel.dart';
 import 'dashboard_header.dart';
 import '../../admin/manage_villa_screen.dart';
 import '../../admin/manage_booking_screen.dart';
-import '../../admin/admin_laporan_screen.dart';
+
 
 class AdminDashboard extends ConsumerWidget {
   const AdminDashboard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final adminState = ref.watch(adminProvider);
-    final user = ref.watch(authProvider).user;
-    final isSuper = user?.role == 'superadmin';
+    final adminState = ref.watch(adminViewModelProvider);
+    final villaState = ref.watch(villaViewModelProvider);
     final theme = Theme.of(context);
 
+    final stats = adminState.stats;
+    final bookedVillas = stats['villas']?['staying']?.toString() ?? '0';
+    final upcomingCheckins = stats['bookings']?['upcoming']?.toString() ?? '0';
+    final monthlyTotal = stats['bookings']?['total']?.toString() ?? '0';
+
     return RefreshIndicator(
-      onRefresh: () => ref.read(adminProvider.notifier).fetchStats(),
+      onRefresh: () async {
+        ref.read(adminViewModelProvider.notifier).fetchBookings();
+        ref.read(villaViewModelProvider.notifier).fetchVillas();
+      },
       color: AppColors.primary,
       edgeOffset: 100,
       child: CustomScrollView(
@@ -29,7 +36,7 @@ class AdminDashboard extends ConsumerWidget {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.p24),
-              child: adminState.isLoading
+              child: (adminState.isLoading || villaState.isLoading) && adminState.bookings.isEmpty
                 ? const Center(child: Padding(
                     padding: EdgeInsets.only(top: 80),
                     child: CircularProgressIndicator(color: AppColors.primary),
@@ -37,6 +44,28 @@ class AdminDashboard extends ConsumerWidget {
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (adminState.error != null)
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.red.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline, color: Colors.red),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  adminState.error!,
+                                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -69,28 +98,23 @@ class AdminDashboard extends ConsumerWidget {
                       
                       Column(
                         children: [
-                          _buildStatCard(theme, 'Tamu Menginap', adminState.stats?['villas']['booked']?.toString() ?? '0', Icons.meeting_room_rounded, const Color(0xFF3B82F6)),
+                          _buildStatCard(theme, 'Sedang Menginap', bookedVillas, Icons.meeting_room_rounded, const Color(0xFF3B82F6)),
                           const SizedBox(height: 16),
                           Row(
                             children: [
                               Expanded(
-                                child: _buildStatCard(theme, 'Daftar Villa', adminState.stats?['villas']['total']?.toString() ?? '0', Icons.apartment_rounded, AppColors.secondary),
+                                child: _buildStatCard(theme, 'Check-in Terjadwal', upcomingCheckins, Icons.calendar_month_rounded, const Color(0xFFF59E0B)),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
-                                child: _buildStatCard(theme, 'Reservasi Terjadwal', adminState.stats?['bookings']['pending']?.toString() ?? '0', Icons.calendar_month_rounded, AppColors.primary),
+                                child: _buildStatCard(theme, 'Reservasi (Bulan Ini)', monthlyTotal, Icons.bar_chart_rounded, AppColors.primary),
                               ),
                             ],
                           ),
                         ],
                       ),
                       
-                      const SizedBox(height: AppSpacing.p24),
-                      
-                      if (isSuper) ...[
-                        _buildRevenueCard(theme, adminState.stats?['revenue']['formatted'] ?? 'Rp 0'),
-                        const SizedBox(height: AppSpacing.p32),
-                      ],
+                      const SizedBox(height: AppSpacing.p32),
                       
                       Text(
                         'Aksi Cepat',
@@ -106,10 +130,6 @@ class AdminDashboard extends ConsumerWidget {
                       _buildActionTile(context, 'Manajemen Reservasi', 'Verifikasi & pantau jadwal tamu', Icons.event_available_rounded, const Color(0xFF6366F1), () {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => const ManageBookingScreen()));
                       }),
-                      if (isSuper)
-                        _buildActionTile(context, 'Laporan Finansial', 'Analisis arus kas & pendapatan', Icons.analytics_rounded, const Color(0xFFEC4899), () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminLaporanScreen()));
-                        }),
                       
                       const SizedBox(height: AppSpacing.p48),
                     ],
@@ -164,67 +184,6 @@ class AdminDashboard extends ConsumerWidget {
               fontWeight: FontWeight.w600,
               fontSize: 12,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRevenueCard(ThemeData theme, String amount) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.p24),
-      decoration: BoxDecoration(
-        gradient: AppColors.darkGradient,
-        borderRadius: BorderRadius.circular(AppSpacing.radius),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.secondary.withValues(alpha: 0.3),
-            blurRadius: 25,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -20,
-            top: -20,
-            child: Icon(Icons.account_balance_wallet_rounded, color: Colors.white.withValues(alpha: 0.05), size: 120),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'TOTAL PENDAPATAN',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 2,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                amount,
-                style: theme.textTheme.displayMedium?.copyWith(
-                  color: Colors.white, 
-                  fontSize: 32,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'Periode Berjalan',
-                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
           ),
         ],
       ),

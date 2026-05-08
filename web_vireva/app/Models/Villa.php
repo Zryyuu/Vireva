@@ -31,28 +31,34 @@ class Villa extends Model
         'luas_bangunan' => 'integer',
     ];
 
-    protected $appends = ['nama', 'tipe', 'harga', 'formatted_harga', 'image_url', 'all_images', 'detail'];
+    protected $appends = ['nama', 'tipe', 'harga', 'formatted_harga', 'image_url', 'all_images', 'detail', 'raw_foto'];
 
     public function getNamaAttribute() { return $this->nama_villa; }
     public function getTipeAttribute() { return $this->tipe_villa; }
     public function getHargaAttribute() { return $this->harga_permalam; }
+    public function getRawFotoAttribute() { 
+        if (is_array($this->foto)) {
+            return $this->foto;
+        }
+        return $this->foto ? [$this->foto] : [];
+    }
 
     public function getImageUrlAttribute()
     {
         if (is_array($this->foto) && count($this->foto) > 0) {
-            return url('storage/' . $this->foto[0]);
+            return url('api/storage-cors/' . $this->foto[0]);
         }
-        return $this->foto && !is_array($this->foto) ? url('storage/' . $this->foto) : null;
+        return $this->foto && !is_array($this->foto) ? url('api/storage-cors/' . $this->foto) : null;
     }
 
     public function getAllImagesAttribute()
     {
         if (is_array($this->foto)) {
             return array_map(function($path) {
-                return url('storage/' . $path);
+                return url('api/storage-cors/' . $path);
             }, $this->foto);
         }
-        return $this->foto ? [url('storage/' . $this->foto)] : [];
+        return $this->foto ? [url('api/storage-cors/' . $this->foto)] : [];
     }
 
     public function getDetailAttribute()

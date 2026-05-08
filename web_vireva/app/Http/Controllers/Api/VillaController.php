@@ -11,7 +11,7 @@ class VillaController extends Controller
 {
     public function index()
     {
-        $villas = Villa::where('status_villa', 'tersedia')->get();
+        $villas = Villa::all();
         return VillaResource::collection($villas);
     }
 

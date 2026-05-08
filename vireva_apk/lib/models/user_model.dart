@@ -18,17 +18,31 @@ class UserModel {
       id: json['id'],
       name: json['name'],
       email: json['email'],
-      role: json['role'],
+      role: json['role'] ?? 'tamu',
       token: token,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'email': email,
-      'role': role,
-    };
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'email': email,
+        'role': role,
+      };
+
+  // Helper getters
+  bool get isAdmin => role == 'admin' || role == 'superadmin';
+  bool get isSuperAdmin => role == 'superadmin';
+  bool get isUser => role == 'tamu' || role == 'user';
+
+  String get displayRole {
+    switch (role) {
+      case 'superadmin':
+        return 'Super Admin';
+      case 'admin':
+        return 'Admin';
+      default:
+        return 'Tamu';
+    }
   }
 }
