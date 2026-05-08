@@ -74,7 +74,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         ],
                       ),
-                      child: const Icon(Icons.villa_rounded, color: Colors.white, size: 56),
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        height: 56,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.p32),
                     

@@ -5,7 +5,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 class ApiService {
   static String get baseUrl {
     if (kIsWeb) return 'http://127.0.0.1:8000/api';
-    return 'http://10.0.2.2:8000/api';
+    // Gunakan IP laptop (192.168.43.116) agar bisa diakses dari HP fisik via USB Debugging
+    return 'http://192.168.43.116:8000/api';
   }
 
   final Dio _dio;

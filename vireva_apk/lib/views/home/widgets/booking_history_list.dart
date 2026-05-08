@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/app_constants.dart';
 import '../../../viewmodels/booking_viewmodel.dart';
 import 'dashboard_header.dart';
+import '../../booking/booking_detail_screen.dart';
 
 class BookingHistoryList extends ConsumerWidget {
   const BookingHistoryList({super.key});
@@ -223,7 +224,12 @@ class _BookingHistoryCard extends ConsumerWidget {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      // Navigate to details
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BookingDetailScreen(booking: booking),
+                        ),
+                      );
                     },
                     child: Container(
                       padding: const EdgeInsets.all(8),
