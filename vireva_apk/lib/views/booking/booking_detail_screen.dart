@@ -3,13 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:printing/printing.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:image/image.dart' as img;
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
-import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import '../../core/app_constants.dart';
 import '../../models/booking_model.dart';
@@ -33,10 +29,24 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
 
   Future<void> _printReceipt() async {
     if (_isPrinting) return;
-    
-    setState(() {
-      _isPrinting = true;
-    });
+
+    // 1. Cek apakah Bluetooth aktif
+    bool? isOn = await bluetooth.isOn;
+    if (isOn == false) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Bluetooth mati. Silakan aktifkan dulu.'),
+          action: SnackBarAction(
+            label: 'SETTING',
+            onPressed: () => bluetooth.openSettings,
+          ),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isPrinting = true);
 
     try {
       final Uint8List? imageBytes = await _screenshotController.capture();
@@ -44,18 +54,16 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
         setState(() { _isPrinting = false; });
         return;
       }
-      
+
       setState(() { _isPrinting = false; }); // Lepas state untuk dialog
       _showBluetoothDevicePicker(imageBytes);
-      
+
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal menyiapkan struk: $e'), backgroundColor: Colors.red),
-      );
       if (mounted) {
-        setState(() {
-          _isPrinting = false;
-        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal menyiapkan struk: $e'), backgroundColor: Colors.red),
+        );
+        setState(() => _isPrinting = false);
       }
     }
   }
@@ -65,16 +73,19 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
     try {
       devices = await bluetooth.getBondedDevices();
     } catch (e) {
-      print("Error getting devices: $e");
+      debugPrint("Error getting devices: $e");
     }
 
     if (!mounted) return;
 
     if (devices.isEmpty) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tidak ada perangkat Bluetooth yang di-pairing. Menggunakan cetak bawaan...')),
+        const SnackBar(
+          content: Text('Tidak ada perangkat Bluetooth yang di-pairing. Pastikan sudah pair di HP.'),
+          backgroundColor: Colors.orange,
+        ),
       );
-      _fallbackToSystemPrint(imageBytes);
       return;
     }
 
@@ -88,6 +99,8 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('Pilih Printer Bluetooth', style: GoogleFonts.spaceGrotesk(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text('Hanya perangkat yang sudah di-pairing', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
               const SizedBox(height: 16),
               ...devices.map((device) => ListTile(
                 leading: const Icon(Icons.print_rounded, color: AppColors.primary),
@@ -98,15 +111,6 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                   _connectAndPrint(device, imageBytes);
                 },
               )),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.picture_as_pdf_rounded, color: Colors.orange),
-                title: const Text('Gunakan Print Bawaan (Darurat)'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _fallbackToSystemPrint(imageBytes);
-                },
-              )
             ],
           ),
         );
@@ -117,7 +121,8 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
   Future<void> _connectAndPrint(BluetoothDevice device, Uint8List imageBytes) async {
     if (_isPrinting) return;
     setState(() => _isPrinting = true);
-    
+
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Menghubungkan ke ${device.name}...')),
     );
@@ -127,33 +132,34 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
       if (isConnected == false) {
         await bluetooth.connect(device);
       }
-      
+
       final booking = widget.booking;
       final profile = await CapabilityProfile.load();
       final generator = Generator(PaperSize.mm58, profile);
       List<int> bytes = [];
 
-      // 1. Tambahkan Logo (Diolah agar tidak bikin crash)
+      // 1. Logo kecil (160px — ringan & stabil untuk printer RP58B)
       try {
         final ByteData data = await rootBundle.load('assets/images/logo.png');
         final Uint8List logoBytes = data.buffer.asUint8List();
         img.Image? logo = img.decodeImage(logoBytes);
         if (logo != null) {
-          logo = img.copyResize(logo, width: 160); // Kecil biar aman & stabil
+          logo = img.copyResize(logo, width: 160);
           logo = img.grayscale(logo);
           bytes += generator.image(logo, align: PosAlign.center);
         }
       } catch (e) {
-        print("Gagal muat logo: $e");
+        debugPrint("Gagal muat logo: $e");
       }
 
-      // 2. Susun Struk secara Tekstual (Lebih Tajam & Stabil)
-      bytes += generator.text('VIREVA VILLA', 
-        styles: const PosStyles(align: PosAlign.center, bold: true, height: PosTextSize.size2, width: PosTextSize.size2));
+      // 2. Header teks
+      bytes += generator.text('VIREVA VILLA',
+          styles: const PosStyles(align: PosAlign.center, bold: true, height: PosTextSize.size2, width: PosTextSize.size2));
       bytes += generator.text('Curahbamban, Tanggul Wetan', styles: const PosStyles(align: PosAlign.center));
       bytes += generator.text('0851-9814-9402', styles: const PosStyles(align: PosAlign.center));
       bytes += generator.text('================================', styles: const PosStyles(align: PosAlign.center));
-      
+
+      // 3. Detail booking
       bytes += generator.row([
         PosColumn(text: 'INVOICE', width: 5),
         PosColumn(text: '#VRV-${booking.id.toString().padLeft(5, '0')}', width: 7, styles: const PosStyles(align: PosAlign.right)),
@@ -166,15 +172,23 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
         PosColumn(text: 'TAMU', width: 5),
         PosColumn(text: booking.tamu?.namaTamu.toUpperCase() ?? 'TAMU', width: 7, styles: const PosStyles(align: PosAlign.right)),
       ]);
-      
+
       bytes += generator.text('--------------------------------');
       bytes += generator.text(booking.villa?.nama ?? 'VILLA', styles: const PosStyles(bold: true));
       bytes += generator.row([
-        PosColumn(text: '${booking.totalHari} MALAM', width: 6),
-        PosColumn(text: booking.formattedTotalBiaya, width: 6, styles: const PosStyles(align: PosAlign.right)),
+        PosColumn(text: 'CHECK-IN', width: 6),
+        PosColumn(text: _formatDate(booking.tanggalCheckin), width: 6, styles: const PosStyles(align: PosAlign.right)),
       ]);
-      
-      bytes += generator.text('--------------------------------');
+      bytes += generator.row([
+        PosColumn(text: 'CHECK-OUT', width: 6),
+        PosColumn(text: _formatDate(booking.tanggalCheckout), width: 6, styles: const PosStyles(align: PosAlign.right)),
+      ]);
+      bytes += generator.row([
+        PosColumn(text: 'DURASI', width: 6),
+        PosColumn(text: '${booking.totalHari} MALAM', width: 6, styles: const PosStyles(align: PosAlign.right)),
+      ]);
+
+      bytes += generator.text('================================');
       bytes += generator.row([
         PosColumn(text: 'TOTAL', width: 6, styles: const PosStyles(bold: true)),
         PosColumn(text: booking.formattedTotalBiaya, width: 6, styles: const PosStyles(align: PosAlign.right, bold: true)),
@@ -183,50 +197,34 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
         PosColumn(text: 'STATUS', width: 6),
         PosColumn(text: 'LUNAS', width: 6, styles: const PosStyles(align: PosAlign.right, bold: true)),
       ]);
-      
+
       bytes += generator.text('================================', styles: const PosStyles(align: PosAlign.center));
       bytes += generator.feed(1);
       bytes += generator.text('TERIMA KASIH', styles: const PosStyles(align: PosAlign.center, bold: true));
-      bytes += generator.text('Atas Kunjungan Anda', styles: const PosStyles(align: PosAlign.center));
+      bytes += generator.text('Simpan struk sebagai bukti', styles: const PosStyles(align: PosAlign.center));
       bytes += generator.feed(3);
-      
-      // Kirim bytes
+
+      // 4. Kirim ke printer
       await bluetooth.writeBytes(Uint8List.fromList(bytes));
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Berhasil mencetak!'), backgroundColor: Colors.green),
-      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Berhasil mencetak!'), backgroundColor: Colors.green),
+        );
+      }
     } catch (e) {
-      print("Bluetooth Error: $e");
+      debugPrint("Bluetooth Error: $e");
       try { await bluetooth.disconnect(); } catch (_) {}
-      
+
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Koneksi printer gagal. Mengalihkan ke bawaan...'), backgroundColor: Colors.red),
+        SnackBar(content: Text('Gagal mencetak: $e'), backgroundColor: Colors.red),
       );
-      _fallbackToSystemPrint(imageBytes);
     } finally {
       if (mounted) setState(() => _isPrinting = false);
     }
   }
 
-  Future<void> _fallbackToSystemPrint(Uint8List imageBytes) async {
-    final pdf = pw.Document();
-    final pdfImage = pw.MemoryImage(imageBytes);
-
-    pdf.addPage(
-      pw.Page(
-        pageFormat: const PdfPageFormat(58 * PdfPageFormat.mm, double.infinity, marginAll: 2 * PdfPageFormat.mm),
-        build: (pw.Context context) {
-          return pw.Center(child: pw.Image(pdfImage));
-        },
-      ),
-    );
-
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdf.save(),
-      name: 'Struk-Vireva-${widget.booking.id}',
-    );
-  }
 
   Future<void> _pickAndUploadImage() async {
     final XFile? image = await _picker.pickImage(
@@ -512,56 +510,49 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
 
   Widget _buildThermalReceiptView(BookingModel booking) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
-      decoration: BoxDecoration(
+      width: 384, // Paksa lebar standard printer 58mm
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10), // Padding tipis saja
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
       ),
       child: Column(
         children: [
           // Logo in Receipt
-          Image.asset('assets/images/logo.png', height: 40),
+          Image.asset('assets/images/logo.png', height: 60), // Gedein dikit
           const SizedBox(height: 12),
           const Text(
             'VIREVA VILLA',
-            style: TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.bold, fontSize: 18),
+            style: TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.bold, fontSize: 24), // Gedein
           ),
           const Text(
             'Curahbamban, Tanggul Wetan\n0851-9814-9402',
             textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: 'Courier', fontSize: 10),
+            style: TextStyle(fontFamily: 'Courier', fontSize: 14), // Gedein
           ),
           const SizedBox(height: 20),
-          const Text('==========================', style: TextStyle(fontFamily: 'Courier')),
+          const Text('================================', style: TextStyle(fontFamily: 'Courier', fontSize: 16)),
           _buildThermalRow('INVOICE', '#VRV-${booking.id.toString().padLeft(5, '0')}'),
           _buildThermalRow('TANGGAL', booking.createdAt?.split('T')[0] ?? '-'),
           _buildThermalRow('TAMU', booking.tamu?.namaTamu ?? 'TAMU'),
-          const Text('--------------------------', style: TextStyle(fontFamily: 'Courier')),
+          const Text('--------------------------------', style: TextStyle(fontFamily: 'Courier', fontSize: 16)),
           _buildThermalRow('UNIT', booking.villa?.nama ?? '-'),
           _buildThermalRow('DURASI', '${booking.totalHari} MALAM'),
           _buildThermalRow('CHECK-IN', _formatDate(booking.tanggalCheckin)),
           _buildThermalRow('CHECK-OUT', _formatDate(booking.tanggalCheckout)),
-          const Text('==========================', style: TextStyle(fontFamily: 'Courier')),
+          const Text('================================', style: TextStyle(fontFamily: 'Courier', fontSize: 16)),
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('TOTAL', style: TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.bold, fontSize: 14)),
-              Text(booking.formattedTotalBiaya, style: const TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.bold, fontSize: 14)),
+              const Text('TOTAL', style: TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.bold, fontSize: 18)),
+              Text(booking.formattedTotalBiaya, style: const TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.bold, fontSize: 18)),
             ],
           ),
           const SizedBox(height: 4),
           _buildThermalRow('STATUS', 'LUNAS'),
           const SizedBox(height: 30),
-          const Text('TERIMA KASIH', style: TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.bold)),
-          const Text('SIMPAN STRUK SEBAGAI BUKTI', style: TextStyle(fontFamily: 'Courier', fontSize: 8)),
+           const Text('TERIMA KASIH', style: TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.bold, fontSize: 16)),
+          const Text('SIMPAN STRUK SEBAGAI BUKTI', style: TextStyle(fontFamily: 'Courier', fontSize: 10)),
         ],
       ),
     );
@@ -569,17 +560,17 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
 
   Widget _buildThermalRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontFamily: 'Courier', fontSize: 10)),
+          Text(label, style: const TextStyle(fontFamily: 'Courier', fontSize: 14)),
           Expanded(
             child: Text(
               value,
               textAlign: TextAlign.right,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontFamily: 'Courier', fontSize: 10, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontFamily: 'Courier', fontSize: 14, fontWeight: FontWeight.bold),
             ),
           ),
         ],
