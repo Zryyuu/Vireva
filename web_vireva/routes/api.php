@@ -18,6 +18,12 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     Route::post('/logout', [ApiAuthController::class, 'logout']);
+
+    // Profile Routes
+    Route::get('/profile', [ApiAuthController::class, 'getProfile']);
+    Route::put('/profile', [ApiAuthController::class, 'updateProfile']);
+    Route::put('/profile/password', [ApiAuthController::class, 'updatePassword']);
+
     
     // Booking Routes
     Route::get('/bookings', [BookingController::class, 'index']);

@@ -68,9 +68,54 @@ class AuthViewModel extends StateNotifier<AuthState> {
   }
 
   Future<void> checkAuth() async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, clearError: true);
     final user = await _repo.getUser();
     state = state.copyWith(user: user, isLoading: false);
+  }
+
+  Future<bool> updateProfile({
+    required String name,
+    required String email,
+    String? phone,
+    String? nik,
+    String? alamat,
+  }) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final updatedUser = await _repo.updateProfile(
+        name: name,
+        email: email,
+        phone: phone,
+        nik: nik,
+        alamat: alamat,
+      );
+
+      state = state.copyWith(user: updatedUser, isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+          isLoading: false, error: _parseError(e));
+      return false;
+    }
+  }
+
+  Future<bool> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      await _repo.updatePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+      state = state.copyWith(isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+          isLoading: false, error: _parseError(e));
+      return false;
+    }
   }
 
   String _parseError(dynamic e) {

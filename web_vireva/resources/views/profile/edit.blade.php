@@ -9,13 +9,10 @@
 
                 <!-- Profile Info -->
                 <div class="text-center md:text-left space-y-2">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-widest">
-                        <i data-lucide="shield-check" class="w-3 h-3"></i>
-                        {{ Auth::user()->role === 'user' ? 'Member Premium' : 'Administrator' }}
-                    </div>
                     <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight">
+
                         {{ Auth::user()->name }}
-                    </div>
+                    </h2>
                     <p class="text-slate-400 text-sm md:text-base font-medium max-w-md">
                         Kelola informasi pribadi, kredensial keamanan, dan preferensi akun Anda di satu tempat yang aman.
                     </p>
@@ -28,10 +25,11 @@
         </div>
     </x-slot>
 
-    <div class="py-12 space-y-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 gap-12 animate__animated animate__fadeInUp">
+    <div class="py-6 space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 gap-8 animate__animated animate__fadeInUp">
             <!-- Profile Information -->
             <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-sm border border-slate-200">
+
                 <div class="max-w-2xl">
                     @include('profile.partials.update-profile-information-form')
                 </div>

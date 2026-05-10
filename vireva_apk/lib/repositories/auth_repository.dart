@@ -54,7 +54,7 @@ class AuthRepository {
     if (token == null) return null;
 
     try {
-      final response = await _api.get('/user');
+      final response = await _api.get('/profile');
       if (response.statusCode == 200) {
         return UserModel.fromJson(response.data, token: token);
       }
@@ -62,5 +62,37 @@ class AuthRepository {
       await prefs.remove('token');
     }
     return null;
+  }
+
+  Future<UserModel> updateProfile({
+    required String name,
+    required String email,
+    String? phone,
+    String? nik,
+    String? alamat,
+  }) async {
+    final response = await _api.put('/profile', data: {
+      'name': name,
+      'email': email,
+      'phone': phone,
+      'nik': nik,
+      'alamat': alamat,
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    return UserModel.fromJson(response.data['user'], token: token);
+  }
+
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await _api.put('/profile/password', data: {
+      'current_password': currentPassword,
+      'new_password': newPassword,
+      'new_password_confirmation': newPassword,
+    });
   }
 }

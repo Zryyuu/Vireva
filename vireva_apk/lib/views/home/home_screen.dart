@@ -9,6 +9,7 @@ import 'widgets/beranda_tab.dart';
 import 'widgets/explore_tab.dart';
 import 'widgets/admin_dashboard.dart';
 import 'widgets/booking_history_list.dart';
+import '../profile/profile_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -58,6 +59,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       const BerandaTab(),
       const ExploreTab(),
       const BookingHistoryList(),
+      const ProfileScreen(),
     ];
 
     return Scaffold(
@@ -94,6 +96,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               icon: Icon(Icons.history_outlined),
               activeIcon: Icon(Icons.history_rounded),
               label: 'PESANANKU',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              activeIcon: Icon(Icons.person_rounded),
+              label: 'PROFIL',
             ),
           ],
         ),
