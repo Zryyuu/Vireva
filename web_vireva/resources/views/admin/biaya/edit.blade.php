@@ -46,8 +46,9 @@
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Jumlah Biaya (Rp)</label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Rp</span>
-                            <input type="number" name="jumlah" value="{{ old('jumlah', $biaya->jumlah) }}" required
+                            <input type="text" id="jumlah_display" value="{{ number_format(old('jumlah', $biaya->jumlah), 0, ',', '.') }}" required
                                 class="w-full bg-slate-50 border-slate-200 rounded-xl pl-12 focus:ring-emerald-500 focus:border-emerald-500 font-bold text-slate-700">
+                            <input type="hidden" name="jumlah" id="jumlah_raw" value="{{ old('jumlah', $biaya->jumlah) }}">
                         </div>
                         @error('jumlah') <p class="text-red-500 text-xs mt-1 font-bold">{{ $message }}</p> @enderror
                     </div>
@@ -80,4 +81,29 @@
             </form>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const displayInput = document.getElementById('jumlah_display');
+            const rawInput = document.getElementById('jumlah_raw');
+
+            displayInput.addEventListener('input', function(e) {
+                // Remove all non-digits
+                let value = this.value.replace(/\D/g, '');
+                
+                // Update raw input
+                rawInput.value = value;
+                
+                // Format with dots
+                if (value !== '') {
+                    this.value = new Intl.NumberFormat('id-ID').format(value);
+                } else {
+                    this.value = '';
+                }
+            });
+        });
+    </script>
+    @endpush
 </x-admin-layout>
+

@@ -28,8 +28,9 @@
                     <!-- Amount -->
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Jumlah (Rp)</label>
-                        <input type="number" name="jumlah" required placeholder="0" 
+                        <input type="text" id="jumlah_display" required placeholder="0" 
                             class="w-full px-5 py-4 bg-slate-50 border-transparent rounded-2xl focus:bg-white focus:border-emerald-500 focus:ring-0 transition-all font-bold text-slate-900">
+                        <input type="hidden" name="jumlah" id="jumlah_raw">
                     </div>
 
                     <!-- Category -->
@@ -69,4 +70,24 @@
             </form>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const displayInput = document.getElementById('jumlah_display');
+            const rawInput = document.getElementById('jumlah_raw');
+
+            displayInput.addEventListener('input', function(e) {
+                let value = this.value.replace(/\D/g, '');
+                rawInput.value = value;
+                if (value !== '') {
+                    this.value = new Intl.NumberFormat('id-ID').format(value);
+                } else {
+                    this.value = '';
+                }
+            });
+        });
+    </script>
+    @endpush
 </x-admin-layout>
+

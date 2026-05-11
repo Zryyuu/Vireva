@@ -1,81 +1,52 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/app_constants.dart';
-import '../../../viewmodels/auth_viewmodel.dart';
 
-class DashboardHeader extends ConsumerWidget {
+class DashboardHeader extends StatelessWidget {
   final String title;
   const DashboardHeader({super.key, required this.title});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authViewModelProvider).user;
-    final theme = Theme.of(context);
-    
+  Widget build(BuildContext context) {
     return SliverToBoxAdapter(
       child: Container(
-        padding: const EdgeInsets.fromLTRB(AppSpacing.p24, AppSpacing.p32, AppSpacing.p24, AppSpacing.p24),
-        child: Row(
+        padding: const EdgeInsets.fromLTRB(AppSpacing.p24, AppSpacing.p48, AppSpacing.p24, AppSpacing.p16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                gradient: AppColors.darkGradient,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.secondary.withValues(alpha: 0.2),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
+            Text(
+              title.toUpperCase(),
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2,
+                color: AppColors.primary,
               ),
-              child: Center(
-                child: Text(
-                  (user?.name ?? 'A').substring(0, 1).toUpperCase(),
-                  style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontSize: 24),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title == 'Riwayat Pesanan' ? 'Pesananku' : title,
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.secondary,
+                    letterSpacing: -1,
+                  ),
                 ),
-              ),
+                // Kita bisa tambah icon kecil di sini kalau perlu, 
+                // tapi sementara kita buat super clean.
+              ],
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Selamat Datang,',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    user?.name ?? 'Administrator',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            const SizedBox(height: 8),
             Container(
+              width: 40,
+              height: 4,
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                border: Border.all(color: AppColors.border),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.logout_rounded, color: AppColors.error, size: 22),
-                onPressed: () => ref.read(authViewModelProvider.notifier).logout(),
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
           ],

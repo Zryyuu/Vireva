@@ -173,7 +173,7 @@
         @endforeach
     </section>
 
-    <!-- Nawala (Redesain Radikal: Manifesto Split - Responsive Optimized) -->
+    <!-- Filosofi Section (Existing) -->
     <section id="philosophy" class="min-h-screen bg-white flex flex-col lg:flex-row overflow-hidden">
         <!-- Bagian Manifesto (Kiri) -->
         <div class="w-full lg:w-7/12 p-12 sm:p-20 lg:p-32 flex flex-col justify-center bg-white">
@@ -223,9 +223,97 @@
                     </div>
                 </div>
             </div>
-
             <!-- Accent -->
             <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl opacity-50 sm:opacity-100"></div>
         </div>
     </section>
+
+    <!-- Statistik Section (NEW) -->
+    <section class="py-24 bg-light border-y border-dark/5">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-20 items-center">
+                <!-- Text Content -->
+                <div class="space-y-8">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-[0.4em] text-primary mb-4 block">Eksplorasi Data</span>
+                        <h2 class="text-4xl lg:text-5xl font-bold tracking-tighter leading-tight">Analisis Kepuasan <br> Tamu Kami.</h2>
+                    </div>
+                    <p class="text-secondary text-lg font-light leading-relaxed">
+                        Berdasarkan survei terbaru dari 10 responden, mayoritas tamu memberikan nilai di atas 8. Ini merupakan bukti komitmen kami terhadap filosofi kualitas yang kami pegang.
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-8 pt-4">
+                        <div class="space-y-2">
+                            <h4 class="text-4xl font-black text-dark tracking-tighter">7.4</h4>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-secondary/60">Rata-rata Skor</p>
+                        </div>
+                        <div class="space-y-2">
+                            <h4 class="text-4xl font-black text-primary tracking-tighter">10</h4>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-secondary/60">Total Responden</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Content -->
+                <div class="bg-white p-10 lg:p-16 shadow-2xl border border-dark/5 relative">
+                    <div class="relative z-10 aspect-square">
+                        <canvas id="satisfactionChart"></canvas>
+                    </div>
+                    <!-- Legend Decor -->
+                    <div class="absolute top-0 right-0 p-8">
+                        <i data-lucide="bar-chart-3" class="w-8 h-8 text-primary opacity-20"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('satisfactionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Skor 10', 'Skor 9', 'Skor 8', 'Skor 7', 'Skor 1'],
+                    datasets: [{
+                        data: [2, 4, 1, 1, 2],
+                        backgroundColor: [
+                            '#059669', // Skor 10 (Emerald 600)
+                            '#10B981', // Skor 9 (Emerald 500)
+                            '#34D399', // Skor 8 (Emerald 400)
+                            '#6EE7B7', // Skor 7 (Emerald 300)
+                            '#0F172A'  // Skor 1 (Slate 900)
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 20
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 30,
+                                usePointStyle: true,
+                                font: {
+                                    size: 11,
+                                    family: 'Inter',
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: 20
+                    }
+                }
+            });
+        });
+    </script>
+    @endpush
+
 @endsection

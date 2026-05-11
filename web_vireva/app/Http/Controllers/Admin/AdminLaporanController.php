@@ -41,6 +41,7 @@ class AdminLaporanController extends Controller
             $queryBiaya->whereMonth('tanggal', $month);
         }
         $totalBiaya = $queryBiaya->sum('jumlah');
+        $totalLaba = $totalOmzet - $totalBiaya;
 
         // 3. Pendapatan Bulanan (Untuk Grafik - Selalu 12 bulan)
         $monthlyRevenue = Pemesanan::whereIn('status_pembayaran', ['settlement', 'paid'])
@@ -95,6 +96,7 @@ class AdminLaporanController extends Controller
             'totalOmzet', 
             'totalBooking', 
             'totalBiaya', 
+            'totalLaba',
             'chartData',
             'expenseChartData',
             'popularVillas',
@@ -102,5 +104,6 @@ class AdminLaporanController extends Controller
             'year',
             'month'
         ));
+
     }
 }

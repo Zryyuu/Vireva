@@ -21,48 +21,61 @@
                         @endfor
                     </select>
                 </form>
-                <button onclick="window.print()" class="bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-slate-900 transition-all flex items-center gap-2 shadow-lg shadow-slate-900/20">
-                    <i data-lucide="printer" class="w-4 h-4"></i>
-                    <span>Cetak Laporan</span>
-                </button>
             </div>
         </div>
+
 
         <!-- Summary Metrics -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
-                <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- 1. Total Pendapatan (Gross) -->
+            <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 w-20 h-20 bg-emerald-50 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
                 <div class="relative z-10">
-                    <div class="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-emerald-600/20">
-                        <i data-lucide="wallet" class="w-6 h-6"></i>
+                    <div class="w-10 h-10 bg-emerald-600 rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg shadow-emerald-600/20">
+                        <i data-lucide="wallet" class="w-5 h-5"></i>
                     </div>
-                    <div class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Total Pendapatan (Gross)</div>
-                    <div class="text-3xl font-black text-slate-900 tracking-tight">Rp {{ number_format($totalOmzet, 0, ',', '.') }}</div>
+                    <div class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Total Pendapatan (Gross)</div>
+                    <div class="text-2xl font-black text-slate-900 tracking-tight">Rp {{ number_format($totalOmzet, 0, ',', '.') }}</div>
                 </div>
             </div>
 
-            <div class="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
-                <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
+            <!-- 2. Total Pengeluaran -->
+            <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 w-20 h-20 bg-red-50 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
                 <div class="relative z-10">
-                    <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-blue-600/20">
-                        <i data-lucide="calendar-check" class="w-6 h-6"></i>
+                    <div class="w-10 h-10 bg-red-600 rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg shadow-red-600/20">
+                        <i data-lucide="trending-down" class="w-5 h-5"></i>
                     </div>
-                    <div class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Total Reservasi</div>
-                    <div class="text-3xl font-black text-slate-900 tracking-tight">{{ $totalBooking }} <span class="text-sm font-bold text-slate-400 ml-1 uppercase">Transaksi</span></div>
+                    <div class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Total Pengeluaran</div>
+                    <div class="text-2xl font-black text-slate-900 tracking-tight">Rp {{ number_format($totalBiaya, 0, ',', '.') }}</div>
                 </div>
             </div>
 
-            <div class="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
-                <div class="absolute -right-4 -top-4 w-24 h-24 bg-red-50 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
+            <!-- 3. Pendapatan Bersih (Laba) -->
+            <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 w-20 h-20 bg-blue-50 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
                 <div class="relative z-10">
-                    <div class="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg shadow-red-600/20">
-                        <i data-lucide="trending-down" class="w-6 h-6"></i>
+                    <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg shadow-blue-600/20">
+                        <i data-lucide="circle-dollar-sign" class="w-5 h-5"></i>
                     </div>
-                    <div class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Total Pengeluaran</div>
-                    <div class="text-3xl font-black text-slate-900 tracking-tight">Rp {{ number_format($totalBiaya, 0, ',', '.') }}</div>
+                    <div class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Pendapatan Bersih (Laba)</div>
+                    <div class="text-2xl font-black {{ $totalLaba >= 0 ? 'text-blue-600' : 'text-red-600' }} tracking-tight">Rp {{ number_format($totalLaba, 0, ',', '.') }}</div>
+                </div>
+            </div>
+
+            <!-- 4. Total Reservasi -->
+            <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
+                <div class="relative z-10">
+                    <div class="w-10 h-10 bg-amber-500 rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg shadow-amber-500/20">
+                        <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    </div>
+                    <div class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Total Reservasi</div>
+                    <div class="text-2xl font-black text-slate-900 tracking-tight">{{ $totalBooking }} <span class="text-xs font-bold text-slate-400 ml-1 uppercase">Trx</span></div>
                 </div>
             </div>
         </div>
+
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Main Chart -->

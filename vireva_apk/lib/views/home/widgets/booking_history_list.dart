@@ -240,22 +240,6 @@ class _BookingHistoryCard extends ConsumerWidget {
                       child: const Icon(Icons.visibility_rounded, size: 16, color: Colors.white),
                     ),
                   ),
-                  if (status == 'menunggu' || status == 'aktif') ...[
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: () {
-                        // Action to cancel booking
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.error.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.close_rounded, size: 16, color: AppColors.error),
-                      ),
-                    ),
-                  ],
                 ],
               )
             ],
@@ -263,6 +247,8 @@ class _BookingHistoryCard extends ConsumerWidget {
         ],
       ),
     );
+
+
   }
 
   String _getMonthShort(int month) {
