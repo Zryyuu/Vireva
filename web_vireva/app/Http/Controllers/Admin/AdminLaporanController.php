@@ -60,7 +60,7 @@ class AdminLaporanController extends Controller
             $chartData[] = $monthlyRevenue->get($i, 0);
         }
 
-        // 3b. Pengeluaran Bulanan (Untuk Grafik - negatif supaya ke bawah)
+        // 3b. Pengeluaran Bulanan
         $monthlyExpense = \App\Models\Biaya::whereYear('tanggal', $year)
             ->get()
             ->groupBy(function($item) {

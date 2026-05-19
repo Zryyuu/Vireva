@@ -239,16 +239,16 @@
                         <h2 class="text-4xl lg:text-5xl font-bold tracking-tighter leading-tight">Analisis Kepuasan <br> Tamu Kami.</h2>
                     </div>
                     <p class="text-secondary text-lg font-light leading-relaxed">
-                        Berdasarkan survei terbaru dari 10 responden, mayoritas tamu memberikan nilai di atas 8. Ini merupakan bukti komitmen kami terhadap filosofi kualitas yang kami pegang.
+                        Berdasarkan survei terbaru dari 20 responden, mayoritas tamu memberikan nilai di atas 8. Ini merupakan bukti komitmen kami terhadap filosofi kualitas yang kami pegang.
                     </p>
                     
                     <div class="grid grid-cols-2 gap-8 pt-4">
                         <div class="space-y-2">
-                            <h4 class="text-4xl font-black text-dark tracking-tighter">7.4</h4>
+                            <h4 class="text-4xl font-black text-dark tracking-tighter">8.0</h4>
                             <p class="text-[10px] font-bold uppercase tracking-widest text-secondary/60">Rata-rata Skor</p>
                         </div>
                         <div class="space-y-2">
-                            <h4 class="text-4xl font-black text-primary tracking-tighter">10</h4>
+                            <h4 class="text-4xl font-black text-primary tracking-tighter">20</h4>
                             <p class="text-[10px] font-bold uppercase tracking-widest text-secondary/60">Total Responden</p>
                         </div>
                     </div>
@@ -276,9 +276,9 @@
             new Chart(ctx, {
                 type: 'pie',
                 data: {
-                    labels: ['Skor 10', 'Skor 9', 'Skor 8', 'Skor 7', 'Skor 1'],
+                    labels: ['Skor 10 (15%)', 'Skor 9 (45%)', 'Skor 8 (25%)', 'Skor 7 (5%)', 'Skor 1 (10%)'],
                     datasets: [{
-                        data: [2, 4, 1, 1, 2],
+                        data: [3, 9, 5, 1, 2],
                         backgroundColor: [
                             '#059669', // Skor 10 (Emerald 600)
                             '#10B981', // Skor 9 (Emerald 500)
